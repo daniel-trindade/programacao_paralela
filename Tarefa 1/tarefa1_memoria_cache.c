@@ -27,8 +27,8 @@ void mat_vec_col(double** mat, double* vec, double* res, int n) {
 }
 
 int main() {
-    int sizes[] = {100, 1000, 10000, 50000, 80000};
-    int num_tests = 5;
+    int sizes[] = {100, 500, 1000, 5000, 10000, 15000};
+    int num_tests = sizeof(sizes);
 
     for (int t = 0; t < num_tests; t++) {
         int n = sizes[t];

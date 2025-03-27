@@ -18,22 +18,26 @@
 	
 	\textbf{Introdução:}
 	
-	Nesta tarefa, exploramos a multiplicação de matriz por vetor (MxV), com o objetivo de analisar como os diferentes padrões de acesso aos valores da matriz (por linhas e por colunas) impactam no tempo de execução e porque.
+	Nesta tarefa, exploramos a multiplicação de matriz por vetor (MxV), com o objetivo de analisar como dois diferentes padrões de acesso aos valores da matriz (por linhas e por colunas) impactam no tempo de execução e o motivo pelo qual as execuções diferem.
 	
 	
-	A tarefa consiste em implementar duas versões do algoritmo em C: uma que percorre a matriz por linhas (laço externo sobre linhas, interno sobre colunas) e outra que acessa os elementos por colunas (laço externo sobre colunas, interno sobre linhas). Utilizando funções de medição de tempo apropriadas, comparamos o desempenho das duas abordagens em matrizes de diferentes tamanhos, identificando a partir de qual dimensão os tempos de execução passam a divergir significativamente.
+	A tarefa consiste em implementar duas versões do algoritmo em C, uma que percorre a matriz por linhas (laço externo sobre linhas, interno sobre colunas) e outra que acessa os elementos por colunas (laço externo sobre colunas, interno sobre linhas). Ao executar ambas as versões faremos a medição de tempo, com o fim de comparar o desempenho das duas abordagens em matrizes de diferentes tamanhos, identificando a partir de qual dimensão os tempos de execução passam a divergir significativamente.
 	
 	\vspace{1cm}
 	
 	\textbf{Implementação:}
 	
-	Para testar as duas abordagens e obter seus resultados em um único código, implementamos uma função para cada uma delas: \texttt{mat\_vec\_row}, que realiza o acesso aos elementos da matriz por linhas, e \texttt{mat\_vet\_col}, que acessa os elementos por colunas. Com o código estruturado dessa forma, podemos chamar cada uma delas quando necessário.
+	Para testar as duas abordagens e obter seus resultados em um único código, implementamos uma função para cada uma delas: \texttt{mat\_vec\_row}, que realiza o acesso aos elementos da matriz por linhas, e \texttt{mat\_vet\_col}, que acessa os elementos por colunas. Com o código estruturado dessa forma, podemos testar ambas as abordagens em uma única execução.
 	
-	Faremos a chamada de ambas as funções em um laço de repetição com o fim de fazer testes aumentando o numero de elementos da matriz e do vetor em cada repetição para identificar a partir de qual dimensão começamos a ter uma grande divergência no tempo de execução. Em nosso teste utilizamos uma matriz \textit{nxn} com \textit{n} assumindo os valores de 100, 1000, 10000, 50000 e 100000.
+	Faremos a chamada de ambas as funções em um laço de repetição com o fim de fazer testes aumentando o numero de elementos da matriz e do vetor em cada repetição para identificar a partir de qual dimensão começamos a ter uma grande divergência no tempo de execução.
+	
+	Para execução da análise, realizamos a multiplicação da matriz com tamanho \textit{n$\times$n} por um vetor também de tamanho \textit{n} com \textit{n} assumindo os valores de 100, 1000, 10000, 50000 e 100000. Em cada uma das execuções são medidos os tempos de tomados por cada uma das abordagens propostas e entregues em segundos.
 	
 	\vspace{1cm}
 	
 	\textbf{Código:}
+	
+	O código utiliza a biblioteca \texttt{stdlib.h} para alocação de memória e a \texttt{time.h} para aferição do tempo de execução. O código ficou como se segue:
 	
 	\begin{verbatim}
 		#include <stdio.h>
@@ -113,6 +117,29 @@
 		
 	\end{verbatim}
 	
+	
+	\textbf{Resultados:}
+	
+	Após execução do código obtivemos os seguintes resultados:
+	
+	\begin{table}[ht]
+		\centering
+		\begin{tabular}{|c|c|c|}
+			\hline
+			\textbf{valor de \textit{n}} & \textbf{Tempo de execução por linhas} & \textbf{Tempo de execução por colunas}  \\
+			\hline
+			100 & 0,0002s & 0,0002s \\
+			500 & 0,0045s & 0,0085s \\
+			1.000 & 0,0094s & 0,0215s \\
+			5.000 & 0,0940s & 0,3941s \\
+			10.000 & 0,3517s & 2,1709s \\
+			15.000 & 0,7934s & 6,1648s \\
+			\hline
+		\end{tabular}
+		\caption{Tempo de Execução par cada valor de \textit{n}}
+	\end{table}
+	
+	Como é possível observar, o tempo de execução na abordagem por coluna, se torna muito superior ao da abordagem por linhas. Com \textit{n=500} o tempo da versão por colunas já quase o dobro do tempo da por linhas. No teste com \textit{n=15.000} o tempo usado pelo função que percorre as colunas é quase 8 vezes o tempo usado pela execução por linhas. Podemos observar melhor com o seguinte gráfico:
 	
 	
 \end{document}
