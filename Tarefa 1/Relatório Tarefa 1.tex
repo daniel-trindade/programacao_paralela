@@ -1,0 +1,118 @@
+\documentclass[a4paper, 12pt]{article}
+\usepackage[top=2cm, bottom=2cm, left=2.5cm, right=2.5cm]{geometry}
+
+\begin{document}
+	\begin{center}
+		Universidade Federal do Rio Grande do Norte
+		
+		Departamento de Engenharia da Computação e Automação
+		
+		DCA3703 - Programação Paralela
+		
+		\textbf{Tarefa 1 - Memória Cache}
+		
+		\textbf{Aluno:} Daniel Bruno Trindade da Silva
+	\end{center}
+	
+	\vspace{1cm}
+	
+	\textbf{Introdução:}
+	
+	Nesta tarefa, exploramos a multiplicação de matriz por vetor (MxV), com o objetivo de analisar como os diferentes padrões de acesso aos valores da matriz (por linhas e por colunas) impactam no tempo de execução e porque.
+	
+	
+	A tarefa consiste em implementar duas versões do algoritmo em C: uma que percorre a matriz por linhas (laço externo sobre linhas, interno sobre colunas) e outra que acessa os elementos por colunas (laço externo sobre colunas, interno sobre linhas). Utilizando funções de medição de tempo apropriadas, comparamos o desempenho das duas abordagens em matrizes de diferentes tamanhos, identificando a partir de qual dimensão os tempos de execução passam a divergir significativamente.
+	
+	\vspace{1cm}
+	
+	\textbf{Implementação:}
+	
+	Para testar as duas abordagens e obter seus resultados em um único código, implementamos uma função para cada uma delas: \texttt{mat\_vec\_row}, que realiza o acesso aos elementos da matriz por linhas, e \texttt{mat\_vet\_col}, que acessa os elementos por colunas. Com o código estruturado dessa forma, podemos chamar cada uma delas quando necessário.
+	
+	Faremos a chamada de ambas as funções em um laço de repetição com o fim de fazer testes aumentando o numero de elementos da matriz e do vetor em cada repetição para identificar a partir de qual dimensão começamos a ter uma grande divergência no tempo de execução. Em nosso teste utilizamos uma matriz \textit{nxn} com \textit{n} assumindo os valores de 100, 1000, 10000, 50000 e 100000.
+	
+	\vspace{1cm}
+	
+	\textbf{Código:}
+	
+	\begin{verbatim}
+		#include <stdio.h>
+		#include <stdlib.h>
+		#include <time.h>
+		
+		// Função para medir o tempo
+		double get_time(clock_t start, clock_t end) {
+			return (double)(end - start) / CLOCKS_PER_SEC;
+		}
+		
+		// Multiplicacao MxV com acesso por linhas
+		void mat_vec_row(double** mat, double* vec, double* res, int n) {
+			for (int i = 0; i < n; i++) {
+				res[i] = 0.0;
+				for (int j = 0; j < n; j++) {
+					res[i] += mat[i][j] * vec[j];
+				}
+			}
+		}
+		
+		// Multiplicacao MxV com acesso por colunas
+		void mat_vec_col(double** mat, double* vec, double* res, int n) {
+			for (int j = 0; j < n; j++) {
+				for (int i = 0; i < n; i++) {
+					res[i] += mat[i][j] * vec[j];
+				}
+			}
+		}
+		
+		int main() {
+			int sizes[] = {100, 500, 1000, 2000, 3000};
+			int num_tests = 5;
+			
+			for (int t = 0; t < num_tests; t++) {
+				int n = sizes[t];
+				printf("Tamanho da matriz: %d\n", n);
+				
+				// Alocação de matriz e vetores
+				double** mat = (double**) malloc(n * sizeof(double*));
+				double* vec = (double*) malloc(n * sizeof(double));
+				double* res_row = (double*) calloc(n, sizeof(double));
+				double* res_col = (double*) calloc(n, sizeof(double));
+				
+				for (int i = 0; i < n; i++) {
+					mat[i] = (double*) malloc(n * sizeof(double));
+					for (int j = 0; j < n; j++) {
+						mat[i][j] = (double)rand() / RAND_MAX;
+					}
+					vec[i] = (double)rand() / RAND_MAX;
+				}
+				
+				// Tempo para acesso por linhas
+				clock_t start = clock();
+				mat_vec_row(mat, vec, res_row, n);
+				clock_t end = clock();
+				printf("Tempo (acesso por linhas): %.4f s\n", get_time(start, end));
+				
+				// Tempo para acesso por colunas
+				start = clock();
+				mat_vec_col(mat, vec, res_col, n);
+				end = clock();
+				printf("Tempo (acesso por colunas): %.4f s\n\n", get_time(start, end));
+				
+				// Liberação de memória
+				for (int i = 0; i < n; i++) {
+					free(mat[i]);
+				}
+				free(mat);
+				free(vec);
+				free(res_row);
+				free(res_col);
+			}
+			
+			return 0;
+		}
+		
+	\end{verbatim}
+	
+	
+	
+\end{document}
