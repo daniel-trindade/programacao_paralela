@@ -6,7 +6,7 @@
 //Grafico com a quantidade de interações por digitos corretos
 
 double get_time(clock_t start, clock_t end) {
-    return (double)(end - start) / CLOCKS_PER_SEC;
+    return (double)(end - start) / CLOCKS_PER_SEC * 1000;
 }
 
 double piByLeibniz(int n) {
@@ -31,7 +31,7 @@ int main(){
         clock_t start = clock();
         pi = piByLeibniz(n_it);
         clock_t end = clock();
-        printf("Valor obtido para pi: %.30f Tempo de execução com %lld iterações: %.4f s\n",pi, n_it, get_time(start, end));
+        printf("Valor obtido para pi: %.30f Tempo de execução com %lld iterações: %.4f ms\n",pi, n_it, get_time(start, end));
         n_it *=10;
 
     }

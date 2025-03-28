@@ -1,10 +1,12 @@
 #include <stdio.h>
 #define N = 1000000000;
 
+//Usar parametros o0, o1 e o3 para compilar
+
 int A[N];
 
 void inicialization(){
-    for(i=0; i<N; i++){
+    for(int i=0; i<N; i++){
         A[i] = i+2;
     }
 }
@@ -15,8 +17,8 @@ int version_1(){
     //Start timer
     double start = get_time();
 
-    for(i=0; i<n; i++){
-        soma += A[i];
+    for(int i=0; i<N; i++){
+        sum+= A[i];
     }
 
     //Finishing timer
@@ -33,7 +35,7 @@ int version_2(){
     //Start timer
     double start = get_time();
 
-    for(i=0; i<n; i+=2){
+    for(int i=0; i<n; i+=2){
         soma1 += A[i];
         soma2 += A[i+1];
     }
