@@ -264,7 +264,10 @@
 	
 	\textbf{Conclusão:}
 	
-	Para os desenvolvedores, compreender o funcionamento do processador e da hierarquia de memória é essencial para otimizar o desempenho dos programas. Como demonstrado neste experimento, a escolha do padrão de acesso aos dados pode ter um impacto significativo na eficiência da execução.
+	Os resultados obtidos nesta tarefa demonstram a forte influência da hierarquia de memória no desempenho computacional. A abordagem que percorre a matriz por linhas se mostrou significativamente mais eficiente do que a abordagem por colunas devido ao princípio da localidade. Como os elementos de uma linha estão armazenados de forma contígua na memória RAM, a leitura sequencial reduz o número de acessos à memória principal e aproveita melhor os dados carregados na cache. Já a abordagem por colunas, ao acessar elementos em saltos, aumenta a ocorrência de *cache misses*, tornando a execução progressivamente mais lenta à medida que o tamanho da matriz cresce. Os testes realizados mostraram que, para *n* grande, o tempo de execução por colunas pode ser até oito vezes maior que por linhas, evidenciando esse impacto. 
+	 
+	
+	Esse experimento destaca a importância de considerar a arquitetura de memória ao desenvolver algoritmos eficientes. Pequenos ajustes no padrão de acesso aos dados podem resultar em ganhos expressivos de desempenho sem a necessidade de hardware mais potente. Em aplicações que lidam com grandes volumes de dados, como inteligência artificial e simulações científicas, otimizar o acesso à memória pode ser tão crucial quanto escolher um bom algoritmo. Assim, compreender o funcionamento da memória cache e da localidade é essencial para maximizar a eficiência computacional e melhorar o uso dos recursos disponíveis.
 
 
 	
