@@ -14,6 +14,7 @@ programas compute-bound pela competição por recursos.
 
 gcc -fopenmp -o tarefa_4a tarefa_4a.c
 
+###### EXECUÇÃO ######
 Executar alterando o numero de threads para analizar o comportamento
 OMP_NUM_THREADS=1 ./memory_bound
 OMP_NUM_THREADS=2 ./memory_bound
@@ -24,14 +25,13 @@ OMP_NUM_THREADS=2 ./memory_bound
 #include <stdlib.h>
 #include <omp.h>
 
-#define SIZE 100000000 // Tamanho do vetor
+#define SIZE 100000000
 
 int main() {
 
     double *a = (double *)malloc(SIZE * sizeof(double));
     double start, end;
 
-    // Mede o tempo de execução com paralelismo
     start = omp_get_wtime();
     #pragma omp parallel for
     for (int i = 0; i < SIZE; i++) {
