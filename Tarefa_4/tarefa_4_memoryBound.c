@@ -12,7 +12,7 @@ programas compute-bound pela competição por recursos.
 
 ###### COMPILAÇÃO ######
 
-gcc -fopenmp -o tarefa_4a tarefa_4a.c
+gcc -fopenmp -o memoryBound tarefa_4_memoryBound.c
 
 ###### EXECUÇÃO ######
 Executar alterando o numero de threads para analizar o comportamento

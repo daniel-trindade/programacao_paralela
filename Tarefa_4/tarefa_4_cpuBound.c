@@ -11,7 +11,7 @@ ajudar em programas memory-bound, mas atrapalhar em
 programas compute-bound pela competição por recursos.
 
 ###### COMPILAÇÃO ######
-gcc -fopenmp -o cpu_bound tarefa_4b.c -lm
+gcc -fopenmp -o cpu_bound tarefa_4_cpuBound.c -lm
 
 ###### EXECUÇÃO ######
 OMP_NUM_THREADS=1 ./cpu_bound
