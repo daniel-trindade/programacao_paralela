@@ -61,7 +61,7 @@
 	
 	O segundo programa desenvolvido simula uma carga de trabalho limitada pela capacidade de processamento da CPU (CPU-bound). Ele realiza 100 milhões de operações matemáticas intensivas, envolvendo funções como sin, cos e sqrt, seguidas de uma divisão. Essas operações são realizadas dentro de um laço for paralelo, utilizando a diretiva \texttt{\#pragma omp parallel for} com uma cláusula de reduction para somar corretamente os resultados parciais de cada thread na variável \texttt{result}.
 	
-	O tempo de execução também é medido com \texttt{omp\_get\_wtime()}. Diferente do programa memory-bound, aqui o gargalo está no tempo necessário para realizar os cálculos matemáticos complexos, que demandam mais ciclos de CPU. Esse tipo de programa permite observar como o desempenho pode escalar com múltiplas threads até certo ponto, mas também evidencia como o aumento de concorrência pode gerar competição por recursos internos da CPU, como unidades de ponto flutuante e cache, o que pode limitar os ganhos ou até causar perda de desempenho.
+	O tempo de execução também é medido com \texttt{omp\_get\_wtime()}. Diferente do programa \textit{Memory Bound}, aqui o gargalo está no tempo necessário para realizar os cálculos matemáticos complexos, que demandam mais ciclos de CPU. Esse tipo de programa permite observar como o desempenho pode escalar com múltiplas threads até certo ponto, mas também evidencia como o aumento de concorrência pode gerar competição por recursos internos da CPU, como unidades de ponto flutuante e cache, o que pode limitar os ganhos ou até causar perda de desempenho.
 	
 	O código para essa programa ficou assim:
 	
@@ -109,7 +109,7 @@
 		
 	\section{Resultados}
 	
-	Primeiro vamos conferir os resultados obtidos no código do Memory Bound. Executamos o código por 10 vezes sempre aumentando o número de threads, ou seja, começamos com 1 thread e fomo até 10.
+	Primeiro vamos conferir os resultados obtidos no código do \textit{Memory Bound}. Executamos o código por 10 vezes sempre aumentando o número de threads, ou seja, começamos com 1 thread e fomo até 10.
 	
 	Obtivemos o seguinte resultado:
 		
@@ -137,7 +137,7 @@
 				xtick={1,2,3,4,5,6,7,8,9,10},
 				ymajorgrids=true,
 				grid style=dashed,
-				width=12cm, height=8cm
+				width=10cm, height=6cm
 				]
 				\addplot[color=blue, mark=square*] coordinates {
 					(1,0.3745) (2,0.2012) (3,0.1366) (4,0.1085) (5,0.0999)
@@ -145,10 +145,56 @@
 				};
 			\end{axis}
 		\end{tikzpicture}
-		\caption{Desempenho do programa *memory-bound* variando o número de threads}
+		\caption{Desempenho do programa \textbf{memory-bound} variando o número de threads}
 		\label{fig:memory-bound}
 	\end{figure}
 	
+	O comportamento do tempo de execução está bem como esperado, podemos ver uma melhora significativa até a execução com 4 threads, que é exatamente o número de núcleos físicos que possuímos no processador, entre 5 e 7 threads, continuamos a ver uma melhora, mas bem modesta. A partir da execução com 8 threads começamos a ver oscilação e isso é esperado porque mais threads do que núcleos físicos não melhoram a velocidade de acesso à memória e podem até aumentar a contenção de cache e a latência da RAM.
 	
+	Agora vamos aferir os resultados obtidos no programa \textit{CPU Bound}: 
+	
+	\begin{table}[H]
+		\centering
+		\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|}
+			\hline
+			\textbf{Threads} & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10 \\
+			\hline
+			\textbf{Tempo (s)} & 2.5916 & 1.3193 & 0.9080 & 0.6792 & 0.7766 & 0.6214 & 0.5858 & 0.5396 & 0.5741 & 0.5706 \\
+			\hline
+		\end{tabular}
+		\caption{Tempo de execução do programa \textbf{CPU-bound} para diferentes números de threads}
+		\label{tab:cpu-bound}
+	\end{table}
+	
+	\begin{figure}[H]
+		\centering
+		\begin{tikzpicture}
+			\begin{axis}[
+				xlabel={Número de Threads},
+				ylabel={Tempo de Execução (s)},
+				xmin=1, xmax=10,
+				ymin=0, ymax=3,
+				xtick={1,2,3,4,5,6,7,8,9,10},
+				ymajorgrids=true,
+				grid style=dashed,
+				width=10cm, height=6cm
+				]
+				\addplot[color=red, mark=square*] coordinates {
+					(1,2.5916) (2,1.3193) (3,0.9080) (4,0.6792) (5,0.7766)
+					(6,0.6214) (7,0.5858) (8,0.5396) (9,0.5741) (10,0.5706)
+				};
+			\end{axis}
+		\end{tikzpicture}
+		\caption{Desempenho do programa \textbf{CPU-bound} variando o número de threads}
+		\label{fig:cpu-bound}
+	\end{figure}
+	
+	Da mesma forma que no \textit{Memory Bound} o \textit{CPU Bound} mostrou um desempenho tal como esperado. Por se tratar de um programa que precisa realizar cálculos mais complexos na CPU, seu ganho de desempenho pelo aumento de threads está limitado a quantidade de núcleos físicos. Por isso tivemos uma melhora significativa de 1 a 4 threads, a partir do 5º, o aumento de número de threads passou a causar disputa de recursos com isso o tempo de execução passou a oscilar.
+	
+	\section{Conclusão}
+	
+	\hspace{.7cm}Neste relatório, analisamos o impacto da paralelização em dois programas distintos utilizando OpenMP: um \textit{Memory Bound}, que realiza operações simples em um grande vetor, e outro \textit{CPU Bound}, que executa cálculos matemáticos intensivos. Observamos que no programa \textit{Memory Bound}, o tempo de execução reduziu conforme o número de threads aumentou, até atingir um limite onde os ganhos se tornaram mínimos. Isso ocorre porque a principal limitação não está na capacidade computacional da CPU, mas sim na largura de banda da memória, tornando o multithreading útil apenas até que esse gargalo se manifeste.
+	
+	Já no programa \textit{CPU Bound}, a redução do tempo de execução foi eficiente até atingir o número de núcleos físicos do processador, mas após esse ponto, a competição por recursos internos fez com que os ganhos diminuíssem e, em alguns casos, o desempenho piorasse. Esse comportamento demonstra que o uso eficiente do paralelismo depende da natureza da carga de trabalho: aplicações limitadas por memória podem se beneficiar da paralelização até um certo ponto, enquanto aplicações \textit{CPU Bound} são mais sensíveis à arquitetura do processador. Assim, entender a relação entre hardware e software é essencial para otimizar o desempenho em sistemas paralelos.
 	
 \end{document}
