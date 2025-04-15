@@ -24,6 +24,7 @@ gcc tarefa_5.c -o sequential
 #include <sys/time.h>
 
 #define N 100000000
+//        100.000.000
 
 double get_time(struct timeval start, struct timeval end) {
     return (end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) / 1e6;

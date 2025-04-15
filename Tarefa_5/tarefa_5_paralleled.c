@@ -12,10 +12,10 @@ desafios iniciais da programação paralela, como
 correção e distribuição de carga.
 
 ####COMPILAÇÃO#####
-gcc -fopenmp tarefa_5.c -o sequential
+gcc -fopenmp tarefa_5_paralleled.c -o paralleled
 
 ####EXECUÇÃO#####
-OMP_NUM_THREADS=N ./sequential
+OMP_NUM_THREADS=N ./paralleled
 
 N é o número de threads que você quer usar.
 */
@@ -25,7 +25,7 @@ N é o número de threads que você quer usar.
 #include <sys/time.h>
 #include <omp.h>  // Inclui suporte ao OpenMP
 
-#define N 10000000
+#define N 100000000
 
 double get_time(struct timeval start, struct timeval end) {
     return (end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) / 1e6;
