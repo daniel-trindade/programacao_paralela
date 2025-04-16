@@ -1,0 +1,27 @@
+\documentclass[a4paper, 12pt]{article}
+\usepackage[top=2cm, bottom=2cm, left=1.5cm, right=1.5cm]{geometry}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{pgfplots}
+
+
+\begin{document}
+	\begin{center}
+		Universidade Federal do Rio Grande do Norte
+		
+		Departamento de Engenharia da Computação e Automação
+		
+		DCA3703 - Programação Paralela
+		
+		\textbf{Tarefa 6 - Escopo de variáveis e regiões críticas}
+		
+		\textbf{Aluno:} Daniel Bruno Trindade da Silva
+	\end{center}
+	
+	\section{Introdução}
+	\hspace{.7cm}Esta tarefa tem como objetivo entender paralelismo com OpenMP, o impacto das cláusulas de escopo e como o não uso dessas clausulas pode causar conflito nas variáveis devido a condição de corrida. Para isso implementaremos um algoritmo estocástico para estimativa do número $\pi$ usando o método de Monte Carlo.
+	
+	Inicialmente, a tarefa propõe a paralelização do algoritmo utilizando a diretiva \texttt{\#pragma omp parallel} for. No entanto, essa abordagem incorreta pode resultar em comportamentos inesperados devido ao compartilhamento inadequado de variáveis entre as threads, ocasionando condições de corrida (race conditions). O relatório analisa os motivos que levam a esse resultado incorreto e propõe uma reestruturação do código utilizando as diretivas \texttt{\#pragma omp parallel} em conjunto com \texttt{\#pragma omp for}, além da aplicação das cláusulas private, firstprivate, lastprivate, shared e default(none).
+	
+	
+\end{document}
