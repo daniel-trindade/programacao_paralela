@@ -18,9 +18,98 @@
 		\textbf{Aluno:} Daniel Bruno Trindade da Silva
 	\end{center}
 	
-	\section{Introdução:}
+	\section{Introdução}
 	\hspace{.7cm}Nesta prática, buscamos comparar a programação paralela com a sequencial, para isso desenvolvemos um programa capaz de contar quantos números primos existem entre 2 e um dado \textit{n} e o implementamos em uma versão sequencial e outra paralelizada de forma que não foi alterada a lógica do programa. Por fim comparamos o desempenho das versões do código para entender o impacto da paralelização no tempo de execução.
 	
-	\section{Metodologia:}
+	\section{Metodologia}
+	\hspace{.7cm}Para a versão de execução sequencial, implementamos o código com uma  função chamada \texttt{ehPrimo()} que recebe um número e retorna \texttt{true} caso seja primo, \texttt{false} caso não:
+	
+	\begin{verbatim}
+		bool ehPrimo(int num) {
+			   if (num < 2) return false;
+			   for (int i = 2; i * i <= num; i++) {
+				      if (num % i == 0) return false;
+			   }
+			   return true;
+		}
+	\end{verbatim}
+	
+	Na \texttt{main()} foi implementado um laço de repetição que passa por todos os inteiros de 2 a \textit{n} testando o valor com a função \texttt{ehPrimo()}. Nesse caso temos dois laços de repetição aninhados que testam os números um a um.
+	
+	\begin{verbatim}
+		int main() {
+		    int contador = 0;
+		    struct timeval inicio, fim;
+		    double time_lapsed;
+		    gettimeofday(&inicio, NULL);
+		    for (int i = 2; i <= N; i++) {
+		        if (ehPrimo(i)) {
+		            contador++;
+		        }
+		    }
+		    
+		    gettimeofday(&fim, NULL); 
+		    time_lapsed = get_time(inicio, fim);
+		    printf("Quantidade de números primos eh: %d\n", contador);
+		    printf("Tempo gasto: %f segundos\n", time_lapsed);
+		    
+		    return 0;
+		}
+	\end{verbatim}
+	
+	Para a versão do código paralela, mantivemos a lógica implementada na sequencial, porém acrescentamos a diretiva \texttt{\#pragma omp parallel for} que paraleliza a execução do laço de repetição, distribuindo entre os threads disponíveis. Devido a condição de corrida estabelecida pelo paralelismo do laço precisamos adicionar uma área crítica na variável contador, e nesse caso adicionamos a diretiva \texttt{reduction(+:contador)} que protege a variável desse problema. Com as alterações necessárias a \texttt{main()} ficou da seguinte forma:
+	
+	\begin{verbatim}
+		int main() {
+		    int contador = 0;
+		    struct timeval inicio, fim;
+		    double time_lapsed;
+		    gettimeofday(&inicio, NULL);
+		    
+		    #pragma omp parallel for reduction(+:contador)
+		    
+		    for (int i = 2; i <= N; i++) {
+		        if (ehPrimo(i)) {
+		            contador++;
+		        }
+		    }
+			
+		    gettimeofday(&fim, NULL); 
+		    time_lapsed = get_time(inicio, fim);
+		    printf("Quantidade de números primos eh: %d\n", contador);
+		    printf("Tempo gasto: %f segundos\n", time_lapsed);
+			
+		    return 0;
+		}
+	\end{verbatim}
+	
+	
+	Em ambas as versões o tempo de execução foi calculado utilizando o método \texttt{gettimeofday} da biblioteca \texttt{sys/time.h} para que possamos comparar seus resultados.
+	
+	\section{Resultados}
+	
+	Sequencial
+	
+	n - Tempo de Execução
+	
+	100 - 0,000011
+	1000 - 0,000183
+	10000 - 0,002914
+	100000 - 0,057376
+	1000000 - 0,292285
+	10000000 - 5,107619
+	100000000 - 140,143158
+	
+	Paralelo com 4 threads
+	
+	n - Tempo de Execução
+	
+	100 - 0,000011
+	1000 - 0,000142
+	10000 - 0,001346
+	100000 - 0,050420
+	1000000 - 0,271619
+	10000000 - 4,971940
+	100000000 - 142,141867
 	
 \end{document}
