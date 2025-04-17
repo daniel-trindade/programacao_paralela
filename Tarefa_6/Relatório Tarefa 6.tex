@@ -1,8 +1,10 @@
 \documentclass[a4paper, 12pt]{article}
 \usepackage[top=2cm, bottom=2cm, left=1.5cm, right=1.5cm]{geometry}
-\usepackage{graphicx}
+\usepackage[brazilian]{babel}
+\usepackage{amsmath}
+\usepackage{listings}
 \usepackage{float}
-\usepackage{pgfplots}
+\usepackage{tikz}
 
 
 \begin{document}
@@ -21,7 +23,142 @@
 	\section{Introdução}
 	\hspace{.7cm}Esta tarefa tem como objetivo entender paralelismo com OpenMP, o impacto das cláusulas de escopo e como o não uso dessas clausulas pode causar conflito nas variáveis devido a condição de corrida. Para isso implementaremos um algoritmo estocástico para estimativa do número $\pi$ usando o método de Monte Carlo.
 	
-	Inicialmente, a tarefa propõe a paralelização do algoritmo utilizando a diretiva \texttt{\#pragma omp parallel} for. No entanto, essa abordagem incorreta pode resultar em comportamentos inesperados devido ao compartilhamento inadequado de variáveis entre as threads, ocasionando condições de corrida (race conditions). O relatório analisa os motivos que levam a esse resultado incorreto e propõe uma reestruturação do código utilizando as diretivas \texttt{\#pragma omp parallel} em conjunto com \texttt{\#pragma omp for}, além da aplicação das cláusulas private, firstprivate, lastprivate, shared e default(none).
+	Inicialmente, a tarefa propõe a paralelização do algoritmo utilizando a diretiva \texttt{\#pragma omp parallel for}. No entanto, essa abordagem incorreta pode resultar em comportamentos inesperados devido ao compartilhamento inadequado de variáveis entre as threads, ocasionando condições de corrida (race conditions). O relatório analisa os motivos que levam a esse resultado incorreto e propõe uma reestruturação do código utilizando as diretivas \texttt{\#pragma omp parallel} em conjunto com \texttt{\#pragma omp for}, além da aplicação das cláusulas private, firstprivate, lastprivate, shared e default(none).
 	
+	\section{Metodologia}
+	\hspace{.7cm}O método estocástico de Monte Carlo para estimar o valor de $\pi$ é uma técnica probabilística que usa números aleatórios para resolver um problema matemático. Para estimar $\pi$ utilizaremos um circulo de raio 1 circunscrito em um quadrado de lado 2 como mostrado na figura 1: 
+	
+	
+	\begin{center}
+		\begin{figure}[H]
+		\centering
+			\begin{tikzpicture}[scale=1.5]
+				% Eixos coordenados
+				\draw[->] (-0.5,0) -- (2.5,0) node[right]{$x$};
+				\draw[->] (0,-0.5) -- (0,2.5) node[above]{$y$};
+				
+				% Quadrado de lado 2 encostado nos eixos
+				\draw[fill=blue!20] (0,0) rectangle (2,2);
+				\node at (1,1) {Quadrado};
+				
+				% Círculo de raio 1 à direita do quadrado
+				\draw[fill=red!20] (1,1) circle (1);
+				\node at (3,1) {Círculo};
+				
+				% Marcas de dimensão
+				\draw[<->] (0,-0.3) -- (2,-0.3) node[midway,below]{2};
+				\draw[<->] (2.2,0) -- (2.2,2) node[midway,right]{2};
+				\draw[<->] (1,1) -- (2,1) node[midway,above]{1 (raio)};
+			\end{tikzpicture}
+			\caption{Circulo de raio 1 circunscrito em um quadrado de lado 2}
+		\end{figure}
+	\end{center}
+	
+	Em seguida geraremos muitos pares (x,y) com valores aleatórios entre 0 e 2, ou seja, dentro da área do quadrado, a proporção de pontos encontrados dentro do círculo em relação ao total gerado se aproxima da razão entre as áreas:
+	
+	\[
+	\frac{\text{Pontos no Círculo}}{\text{Total de Pontos}} \approx \frac{\pi}{4}
+	\]
+	
+	\vspace{1cm}
+	
+	Então para estimarmos o valor de $\pi$ pelo método de Monte Carlo temos:
+	
+	\[
+	\pi \approx 4 \times \frac{\text{Pontos no Círculo}}{\text{Total de Pontos}}
+	\]
+	
+	\vspace{.5cm}
+	
+	Assim, a base de nosso código será composto por um laço de repetição que gerará \textit{n} pares aleatórios (x,y) e testará se os pontos estão dentro ou não do circulo. Teremos uma variável chamada \texttt{hit} que servirá de contador dos pontos encontrados dentro da circunferência e os valores para x e y serão gerados aleatoriamente usando a função \texttt{srand} do C.
+	
+	O código terá duas versões, uma com a paralelização incorreta devido ao mal compartilhamento das variáveis e um segundo com os ajustes necessários. Para a paralelização utilizaremos a biblioteca \texttt{OpenOMP} a qual na versão incorreta foi utilizado apenas a diretiva \texttt{\#pragma omp parallel for} já na segunda foram utilizadas as diretivas \texttt{\#pragma omp parallel} e \texttt{\#pragma omp for} em conjunto com as clausulas para as variáveis. Em ambas as versões o numero de pontos (\textit{n}) gerados foi de 1.000.000.000.
+	
+	Por fim, temos nosso código incorreto: 
+	
+	\begin{verbatim}
+		int main() {
+		   int hit = 0;
+			
+		   srand(time(NULL));
+		
+		   #pragma omp parallel for
+		   for (int i = 0; i < NUM_DOTS; i++) {
+		      double x = (double)rand() / RAND_MAX;
+		      double y = (double)rand() / RAND_MAX;
+				
+		      if (x*x + y*y <= 1.0) {
+		         hit++;
+		      }
+		   }
+			
+		   double pi = 4.0 * hit / NUM_DOTS;
+		   printf("Pi estimado (incorreto): %f\n", pi);
+			
+		   return 0;
+		}
+	\end{verbatim}
+	
+	E o código com os ajustes:
+	
+	\begin{verbatim}
+		int main() {
+		
+		int hit = 0;
+		   unsigned int seeds[omp_get_max_threads()];
+		
+		   for (int i = 0; i < omp_get_max_threads(); i++) {
+		      seeds[i] = time(NULL) + i;
+		   }
+		
+		   #pragma omp parallel default(none) shared(hit) private(seeds)
+		   {
+		      int tid = omp_get_thread_num();
+		      unsigned int seed = seeds[tid];
+		      int hit_priv = 0;
+		
+		      #pragma omp for
+		      for (int i = 0; i < NUM_PONTOS; i++) {
+		         double x = 2.0 * rand_r(&seed) / RAND_MAX - 1.0; // x entre -1 e 1
+		         double y = 2.0 * rand_r(&seed) / RAND_MAX - 1.0; // y entre -1 e 1
+		
+		         if (x*x + y*y <= 1.0) {
+		            hit_priv++; // Contagem local (sem condição de corrida)
+		         }
+		      }
+		      
+		      #pragma omp critical
+		      {
+		         hit += hit_priv;
+		      }
+		   }
+		   double pi = 4.0 * (double)hit / NUM_PONTOS;
+		   printf("Estimativa de Pi (com variável local + critical): %f\n", pi);
+		
+		   return 0;
+		}
+	\end{verbatim}
+	
+	\section{Resultados}
+	\hspace{0.7cm}Com relação aos resultados obtidos, observamos que a primeira versão do código apresenta um valor incorreto para $\pi$, estimado em 3{,}0869. Esse resultado se deve ao fato de que, ao paralelizar diretamente o laço com \texttt{\#pragma omp parallel for}, a variável global \texttt{hit} passa a ser acessada e modificada simultaneamente por múltiplas threads. Isso gera uma condição de corrida (\textit{race condition}), uma vez que operações como incremento (\texttt{hit++}) não são atômicas.
+	
+	\hspace{0.7cm}Para ilustrar, considere o trecho de código abaixo:
+	
+	\begin{center}
+		\lstset{basicstyle=\ttfamily}
+		\begin{lstlisting}
+			if (x*x + y*y <= 1.0) {
+				hit++;
+			}
+		\end{lstlisting}
+	\end{center}
+	
+	\hspace{0.7cm}Suponha que, em um dado instante da execução, o valor armazenado em \texttt{hit} seja 6. Se duas threads acessarem essa variável ao mesmo tempo, ambas podem ler o valor 6. A primeira thread soma 1 e armazena 7, mas a segunda, que também havia lido 6, sobrescreve o valor com outro 7. Assim, perdemos uma contagem válida, e o valor final será incorreto (deveria ser 8, mas será 7).
+	
+	\hspace{0.7cm}Esse tipo de paralelização, sem o devido controle de acesso às variáveis compartilhadas, compromete a precisão do resultado. No caso da estimativa de $\pi$, a inconsistência resultou em um valor subestimado (3{,}0869), evidenciando a necessidade de mecanismos como \texttt{reduction} ou seções críticas para garantir a correção.
+	
+	
+	
+	 
 	
 \end{document}

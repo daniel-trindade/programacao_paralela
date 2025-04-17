@@ -3,10 +3,7 @@
 #include <time.h>
 #include <omp.h>
 
-#define NUM_PONTOS 1000000
-
-// Variável global que vai acumular os acertos de todas as threads
-
+#define NUM_PONTOS 1000000000
 
 int main() {
 
@@ -26,11 +23,11 @@ int main() {
 
         // Loop de Monte Carlo dividido entre as threads
         #pragma omp for
-        for (int i = 0; i < NUM_PONTOS; i++) {
+        for(int i = 0; i < NUM_PONTOS; i++){
             double x = 2.0 * rand_r(&seed) / RAND_MAX - 1.0; // x entre -1 e 1
             double y = 2.0 * rand_r(&seed) / RAND_MAX - 1.0; // y entre -1 e 1
 
-            if (x*x + y*y <= 1.0) {
+            if (x*x + y*y <= 1.0){
                 hit_priv++; // Contagem local (sem condição de corrida)
             }
         }

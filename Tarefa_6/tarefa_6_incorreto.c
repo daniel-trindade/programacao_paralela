@@ -16,25 +16,25 @@ mais claro em programas complexos.
 #include <time.h>
 #include <omp.h>
 
-#define NUM_PONTOS 10000000
+#define NUM_DOTS 1000000000
 
 int main() {
-    int dentro = 0;
+    int hit = 0;
 
     srand(time(NULL)); // Semente para números aleatórios
 
     // Versão INCORRETA
     #pragma omp parallel for
-    for (int i = 0; i < NUM_PONTOS; i++) {
+    for (int i = 0; i < NUM_DOTS; i++) {
         double x = (double)rand() / RAND_MAX;
         double y = (double)rand() / RAND_MAX;
 
         if (x*x + y*y <= 1.0) {
-            dentro++;
+            hit++;
         }
     }
 
-    double pi = 4.0 * dentro / NUM_PONTOS;
+    double pi = 4.0 * hit / NUM_DOTS;
     printf("Pi estimado (incorreto): %f\n", pi);
 
     return 0;
