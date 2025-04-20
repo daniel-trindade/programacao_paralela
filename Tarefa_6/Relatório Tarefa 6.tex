@@ -1,5 +1,5 @@
 \documentclass[a4paper, 12pt]{article}
-\usepackage[top=2cm, bottom=2cm, left=1.5cm, right=1.5cm]{geometry}
+\usepackage[top=1.8cm, bottom=1.8cm, left=1.5cm, right=1.5cm]{geometry}
 \usepackage[brazilian]{babel}
 \usepackage{amsmath}
 \usepackage{listings}
@@ -21,7 +21,7 @@
 	\end{center}
 	
 	\section{Introdução}
-	\hspace{.7cm}Esta tarefa tem como objetivo entender paralelismo com OpenMP, o impacto das cláusulas de escopo e como o não uso dessas clausulas pode causar conflito nas variáveis devido a condição de corrida. Para isso implementaremos um algoritmo estocástico para estimativa do número $\pi$ usando o método de Monte Carlo.
+	\hspace{.7cm}Esta tarefa tem como objetivo entender paralelismo com OpenMP, o impacto das cláusulas de escopo e como a ausência delas pode causar conflitos nas variáveis devido a condição de corrida. Para isso implementaremos um algoritmo estocástico para estimativa do número $\pi$ usando o método de Monte Carlo.
 	
 	Inicialmente, a tarefa propõe a paralelização do algoritmo utilizando a diretiva \texttt{\#pragma omp parallel for}. No entanto, essa abordagem incorreta pode resultar em comportamentos inesperados devido ao compartilhamento inadequado de variáveis entre as threads, ocasionando condições de corrida (race conditions). O relatório analisa os motivos que levam a esse resultado incorreto e propõe uma reestruturação do código utilizando as diretivas \texttt{\#pragma omp parallel} em conjunto com \texttt{\#pragma omp for}, além da aplicação das cláusulas private, firstprivate, lastprivate, shared e default(none).
 	
@@ -60,7 +60,7 @@
 	\frac{\text{Pontos no Círculo}}{\text{Total de Pontos}} \approx \frac{\pi}{4}
 	\]
 	
-	\vspace{1cm}
+	\vspace{1.5cm}
 	
 	Então para estimarmos o valor de $\pi$ pelo método de Monte Carlo temos:
 	
@@ -70,9 +70,9 @@
 	
 	\vspace{.5cm}
 	
-	Assim, a base de nosso código será composto por um laço de repetição que gerará \textit{n} pares aleatórios (x,y) e testará se os pontos estão dentro ou não do circulo. Teremos uma variável chamada \texttt{hit} que servirá de contador dos pontos encontrados dentro da circunferência e os valores para x e y serão gerados aleatoriamente usando a função \texttt{srand} do C.
+	Assim, a base de nosso código será composto por um laço de repetição que gerará \textit{n} pares aleatórios (x,y) e testará se os pontos estão dentro ou não do circulo. Teremos uma variável chamada \texttt{hit} que servirá de contador dos pontos encontrados dentro da circunferência e os valores para x e y serão gerados aleatoriamente usando a função \texttt{rand} para geração e \texttt{srand} para inicialização da semente.
 	
-	O código terá duas versões, uma com a paralelização incorreta devido ao mal compartilhamento das variáveis e um segundo com os ajustes necessários. Para a paralelização utilizaremos a biblioteca \texttt{OpenOMP} a qual na versão incorreta foi utilizado apenas a diretiva \texttt{\#pragma omp parallel for} já na segunda foram utilizadas as diretivas \texttt{\#pragma omp parallel} e \texttt{\#pragma omp for} em conjunto com as clausulas para as variáveis. Em ambas as versões o numero de pontos (\textit{n}) gerados foi de 1.000.000.000.
+	O código terá duas versões, uma com a paralelização incorreta devido ao mal compartilhamento das variáveis e um segundo com os ajustes necessários. Para a paralelização utilizaremos a biblioteca \texttt{OpenOMP} a qual na versão incorreta foi utilizado apenas a diretiva \texttt{\#pragma omp parallel for}; já na segunda foram utilizadas as diretivas \texttt{\#pragma omp parallel} e \texttt{\#pragma omp for} em conjunto com as clausulas para as variáveis. Em ambas as versões o numero de pontos (\textit{n}) gerados foi de 1.000.000.000.
 	
 	Por fim, temos nosso código incorreto: 
 	
@@ -140,7 +140,7 @@
 	\end{verbatim}
 	
 	\section{Resultados}
-	\hspace{0.7cm}Com relação aos resultados obtidos, observamos que a primeira versão do código apresenta um valor incorreto para $\pi$, estimado em 3{,}0869. Esse resultado se deve ao fato de que, ao paralelizar diretamente o laço com \texttt{\#pragma omp parallel for}, a variável global \texttt{hit} passa a ser acessada e modificada simultaneamente por múltiplas threads. Isso gera uma condição de corrida (\textit{race condition}), uma vez que operações como incremento (\texttt{hit++}) não são atômicas.
+	\hspace{0.5cm}Com relação aos resultados obtidos, observamos que a primeira versão do código apresenta um valor incorreto para $\pi$, estimado em aproximadamente 3{,}088775. Esse resultado se deve ao fato de que, ao paralelizar diretamente o laço com \texttt{\#pragma omp parallel for}, a variável global \texttt{hit} passa a ser acessada e modificada simultaneamente por múltiplas threads. Isso gera uma condição de corrida (\textit{race condition}), uma vez que operações como incremento (\texttt{hit++}) não são atômicas, ou seja, podem ser interrompidas no meio da execução, resultando em valores errôneos quando acessadas por múltiplas threads simultaneamente..
 	
 	\hspace{0.7cm}Para ilustrar, considere o trecho de código abaixo:
 	
@@ -153,12 +153,27 @@
 		\end{lstlisting}
 	\end{center}
 	
-	\hspace{0.7cm}Suponha que, em um dado instante da execução, o valor armazenado em \texttt{hit} seja 6. Se duas threads acessarem essa variável ao mesmo tempo, ambas podem ler o valor 6. A primeira thread soma 1 e armazena 7, mas a segunda, que também havia lido 6, sobrescreve o valor com outro 7. Assim, perdemos uma contagem válida, e o valor final será incorreto (deveria ser 8, mas será 7).
+	\hspace{0.5cm}Suponha que, em um dado instante da execução, o valor armazenado em \texttt{hit} seja 6. Se duas threads acessarem essa variável ao mesmo tempo, ambas podem ler o valor 6. A primeira thread soma 1 e armazena 7, mas a segunda, que também havia lido 6, sobrescreve o valor com outro 7. Assim, perdemos uma contagem válida, e o valor final será incorreto (deveria ser 8, mas será 7).
 	
-	\hspace{0.7cm}Esse tipo de paralelização, sem o devido controle de acesso às variáveis compartilhadas, compromete a precisão do resultado. No caso da estimativa de $\pi$, a inconsistência resultou em um valor subestimado (3{,}0869), evidenciando a necessidade de mecanismos como \texttt{reduction} ou seções críticas para garantir a correção.
+	\hspace{0.5cm}Esse tipo de paralelização, sem o devido controle de acesso às variáveis compartilhadas, compromete a precisão do resultado. No caso da estimativa de $\pi$, a inconsistência resultou em um valor subestimado (3{,}088775), evidenciando a necessidade de mecanismos como \texttt{reduction}, seções críticas ou o uso de clausulas para garantir a correção.
 	
+	\hspace{0.5cm}A segunda versão do código implementa as correções necessárias para que a estimativa de $\pi$ funcione corretamente em ambiente paralelo. A primeira modificação relevante foi o tratamento das sementes do gerador de números pseudoaleatórios: foi criada uma semente distinta para cada \textit{thread}. Isso garante que cada \textit{thread} utilize sequências diferentes de números aleatórios, evitando sobreposição e assegurando maior aleatoriedade na amostragem.
 	
+	\hspace{0.5cm}Em seguida, foi aplicada a diretiva \texttt{\#pragma omp parallel default(none) shared(hit) private(seeds)}, que define o início da região paralela. A cláusula \texttt{default(none)} exige que todas as variáveis utilizadas dentro do bloco tenham seus escopos explicitamente definidos, o que aumenta a clareza e evita erros. A variável \texttt{hit} é marcada como \texttt{shared}, pois será utilizada por todas as \textit{threads} para computar o total de acertos. Já \texttt{seeds} é declarada como \texttt{private}, garantindo que cada \textit{thread} tenha sua própria cópia da variável.
 	
+	\hspace{0.5cm}Dentro da região paralela, utiliza-se a diretiva \texttt{\#pragma omp for} para dividir o laço \texttt{for} entre as \textit{threads}, distribuindo a carga de trabalho. Além disso, emprega-se a diretiva \texttt{\#pragma omp critical} para proteger o trecho onde cada \textit{thread} soma sua contagem local (\texttt{hit\_priv}) à variável compartilhada \texttt{hit}. Essa seção crítica evita condições de corrida, garantindo a consistência do resultado final. Com isso, a estimativa de $\pi$ obtida foi significativamente mais precisa, chegando ao valor aproximado de $\pi \approx 3{,}141572$, com quatro casas decimais corretas.
+	
+	Com relação às cláusulas, já discutimos sobre \texttt{default(none)}, \texttt{shared} e \texttt{private}, que foram efetivamente utilizadas no código. Sabemos que \texttt{default(none)} obriga o programador a especificar explicitamente o escopo de cada variável, promovendo um controle mais rigoroso e seguro do paralelismo. A cláusula \texttt{shared} indica que uma variável é compartilhada entre todas as threads, como no caso da variável \texttt{hit}, cuja soma dos acertos deve ser consolidada ao final da execução. Por outro lado, \texttt{private} define que cada thread terá sua própria cópia da variável, isolando modificações — útil, por exemplo, no vetor \texttt{seeds}, onde cada thread possui uma semente independente para geração de números aleatórios.
+	
+	Além dessas, é importante compreender o papel das cláusulas \texttt{firstprivate} e \texttt{lastprivate}. A cláusula \texttt{firstprivate} atribui a cada thread uma cópia privada de uma variável, inicializada com o valor presente antes da região paralela. Ela seria aplicável, por exemplo, à variável \texttt{seed}, caso desejássemos que todas as threads partissem de uma mesma semente inicial (o que, neste contexto, não seria apropriado, pois geraria sequências idênticas de números pseudoaleatórios, comprometendo a aleatoriedade da simulação). Já a cláusula \texttt{lastprivate} garante que, ao final da região paralela, a variável correspondente receba o valor da última iteração lógica do laço — como se o loop tivesse sido executado sequencialmente. Embora essa cláusula não tenha sido usada no código em questão, ela poderia ser útil caso quiséssemos, por exemplo, registrar o último ponto gerado na simulação para análise ou depuração. No entanto, como a estimativa de $\pi$ depende da contagem acumulada e não de valores específicos do final do loop, o uso de \texttt{lastprivate} não se faz necessário neste caso.
+	
+	\section{Conclusão}
+	
+	\hspace{0.7cm}A realização desta tarefa permitiu compreender, na prática, os impactos do escopo de variáveis e das condições de corrida na programação paralela utilizando OpenMP. Foi possível observar que a simples paralelização de um laço, sem o devido controle sobre as variáveis compartilhadas, pode levar a resultados incorretos e inconsistentes, como no caso da estimativa errada de $\pi$.
+	
+	\hspace{0.7cm}A reestruturação do código utilizando diretivas adequadas, como \texttt{\#pragma omp parallel}, \texttt{\#pragma omp for} e \texttt{\#pragma omp critical}, juntamente com o uso apropriado de cláusulas de escopo (\texttt{private}, \texttt{shared}, \texttt{default(none)}), foi fundamental para garantir a corretude da execução paralela. Além disso, o uso de sementes distintas para a geração de números aleatórios assegurou maior diversidade na amostragem e contribuiu para a precisão do resultado.
+	
+	\hspace{0.7cm}Concluímos, portanto, que compreender e aplicar corretamente os conceitos de escopo de variáveis e controle de acesso a regiões críticas é essencial para o desenvolvimento de algoritmos paralelos eficientes e corretos. A experiência prática adquirida nesta tarefa será valiosa para futuras implementações que envolvam concorrência e paralelismo.
 	 
 	
 \end{document}

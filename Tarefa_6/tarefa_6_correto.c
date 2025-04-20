@@ -3,7 +3,7 @@
 #include <time.h>
 #include <omp.h>
 
-#define NUM_PONTOS 1000000000
+#define NUM_DOTS 1000000000
 
 int main() {
 
@@ -23,7 +23,7 @@ int main() {
 
         // Loop de Monte Carlo dividido entre as threads
         #pragma omp for
-        for(int i = 0; i < NUM_PONTOS; i++){
+        for(int i = 0; i < NUM_DOTS; i++){
             double x = 2.0 * rand_r(&seed) / RAND_MAX - 1.0; // x entre -1 e 1
             double y = 2.0 * rand_r(&seed) / RAND_MAX - 1.0; // y entre -1 e 1
 
@@ -40,7 +40,7 @@ int main() {
     }
 
     // Estimativa final de pi
-    double pi = 4.0 * (double)hit / NUM_PONTOS;
+    double pi = 4.0 * (double)hit / NUM_DOTS;
     printf("Estimativa de Pi (com variável local + critical): %f\n", pi);
 
     return 0;
