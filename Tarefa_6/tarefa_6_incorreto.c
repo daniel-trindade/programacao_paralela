@@ -9,6 +9,13 @@ combinações e explique como cada cláusula afeta o
 comportamento do programa. Comente também como a
 cláusula default(none) pode ajudar a tornar o escopo
 mais claro em programas complexos.
+
+####COMPILAÇÃO#####
+gcc -fopenmp tarefa_6_incorreto.c -o incorreto
+
+####EXECUÇÃO#####
+./incorreto
+
 */
 
 #include <stdio.h>
@@ -21,9 +28,8 @@ mais claro em programas complexos.
 int main() {
     int hit = 0;
 
-    srand(time(NULL)); // Semente para números aleatórios
+    srand(time(NULL));
 
-    // Versão INCORRETA
     #pragma omp parallel for
     for (int i = 0; i < NUM_DOTS; i++) {
         double x = (double)rand() / RAND_MAX;

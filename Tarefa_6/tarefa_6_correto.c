@@ -1,3 +1,23 @@
+/*
+TAREFA_6: Implemente em C a estimativa estocástica
+de π. Paralelize com #pragma omp parallel for e
+explique o resultado incorreto. Corrija
+reestruturando com #pragma omp parallel seguido de
+#pragma omp for e aplicando as cláusulas private,
+firstprivate, lastprivate e shared. Teste diferentes
+combinações e explique como cada cláusula afeta o
+comportamento do programa. Comente também como a
+cláusula default(none) pode ajudar a tornar o escopo
+mais claro em programas complexos.
+
+####COMPILAÇÃO#####
+gcc -fopenmp tarefa_6_correto.c -o correto
+
+####EXECUÇÃO#####
+./tarefa_6_correto
+
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -19,7 +39,7 @@ int main() {
     {
         int tid = omp_get_thread_num();               // ID da thread
         unsigned int seed = seeds[tid];               // Semente local da thread
-        int hit_priv = 0;                       // Contador local da thread
+        int hit_priv = 0;                             // Contador local da thread
 
         // Loop de Monte Carlo dividido entre as threads
         #pragma omp for
