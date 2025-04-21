@@ -55,7 +55,6 @@ int main() {
 
     time_lapsed = get_time(inicio, fim);
     
-
     printf("Quantidade de números primos eh: %d\n", contador);
     printf("Tempo gasto: %f segundos\n", time_lapsed);
 
