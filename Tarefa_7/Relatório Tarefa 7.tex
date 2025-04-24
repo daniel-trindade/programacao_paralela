@@ -172,7 +172,7 @@
 	
 	\section{Conclusão}
 	
-	\hspace{0.7cm}A implementação de um programa utilizando lista encadeada e tarefas com OpenMP permitiu observar na prática o funcionamento da diretiva \texttt{\#pragma omp task} e seus impactos no paralelismo. O uso da diretiva \texttt{\#pragma omp single} se mostrou essencial para garantir que apenas uma thread criasse as tasks, evitando duplicidade no processamento dos nós da lista.
+	\hspace{0.7cm}A implementação de um programa utilizando lista encadeada e tarefas com OpenMP permitiu observar na prática o funcionamento da diretiva \texttt{\#pragma omp task} e seus impactos no paralelismo. O uso da diretiva \texttt{\#pragma omp single} se mostrou essencial para garantir que todas as tasks fossem executadas e não houvesse duplicidade nem omissão de nós.
 	
 	Por fim, o comportamento não determinístico da execução, com diferentes threads criando e executando tasks a cada execução, reforça a importância da sincronização e do controle de acesso aos dados compartilhados. O domínio dessas técnicas é essencial para o desenvolvimento de aplicações paralelas eficientes, corretas e seguras.
 	
