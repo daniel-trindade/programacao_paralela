@@ -14,7 +14,6 @@ entre execuções? Como garantir que cada
 nó seja processado uma única vez e porapenas uma tarefa?
 */
 
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

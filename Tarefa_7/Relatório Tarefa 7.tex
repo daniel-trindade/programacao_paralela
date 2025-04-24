@@ -22,22 +22,162 @@
 	O experimento também buscou responder perguntas-chave: todas as tarefas foram executadas? Houve repetição ou omissão na execução dos nós? O comportamento do programa muda a cada execução? Além disso, foram discutidas estratégias para garantir que cada tarefa seja executada uma única vez e por apenas uma thread.
 	
 	\section{Metodologia}
-	\hspace{.7cm}Nosso código foi estruturado para atender os requisitos da tarefa, assim criamos um \texttt{struct} para os nós da lista encadeada, cada nó recebeu dois atributos, \texttt{nome\_arquivo} para dar o nome fictício ao arquivo e \texttt{prox} que é um ponteiro para o próximo nó.
+	\hspace{0.7cm}O código foi estruturado de forma a atender aos requisitos da tarefa proposta. Para isso, foi definida uma \texttt{struct} representando os nós da lista encadeada, contendo dois atributos: \texttt{nome\_arquivo}, utilizado para armazenar um nome fictício de arquivo, e \texttt{prox}, que é um ponteiro para o próximo nó da lista.
 	
 	\begin{verbatim}
 		typedef struct Node {
-		    char nome_arquivo[100];
-		    struct Node* prox;
+			char nome_arquivo[100];
+			struct Node* prox;
 		} Node;
-	\end{verbatim}		
-
+	\end{verbatim}
+	
+	Além disso, foram implementadas funções auxiliares para manipulação da lista: \texttt{criar\_no()}, responsável por alocar e inicializar um novo nó; \texttt{adicionar\_no()}, que insere o novo nó ao final da lista; e \texttt{liberar\_lista()}, utilizada para desalocar toda a memória associada à lista encadeada.
+	
+	\begin{verbatim}
+		Node* criar_no(const char* nome) {
+		    Node* novo = (Node*)malloc(sizeof(Node));
+		    strcpy(novo->nome_arquivo, nome);
+		    novo->prox = NULL;
+		    return novo;
+		}
+		
+		void adicionar_no(Node** head, const char* nome) {
+		    Node* novo = criar_no(nome);
+		    if (*head == NULL) {
+		        *head = novo;
+		    } else {
+		        Node* atual = *head;
+		        while (atual->prox != NULL)
+		        atual = atual->prox;
+		        atual->prox = novo;
+		    }
+		}
+		
+		void liberar_lista(Node* head) {
+		    Node* temp;
+		    while (head) {
+		        temp = head;
+		        head = head->prox;
+		        free(temp);
+		    }
+		}
+	\end{verbatim}
+	
+	A função \texttt{main()} foi desenvolvida com o objetivo de testar a criação da lista encadeada e implementar o processamento paralelo dos seus nós utilizando a biblioteca OpenMP. Inicialmente, os nós são criados e adicionados à lista com nomes fictícios de arquivos, simulando uma situação real de processamento de dados.
+	
+	Em seguida, foi definida uma região paralela com a diretiva \texttt{\#pragma omp parallel}, responsável por ativar múltiplas threads. Dentro dessa região, utilizou-se a diretiva \texttt{\#pragma omp single} para garantir que apenas uma das threads fosse responsável por percorrer a lista e criar as tarefas (\texttt{tasks}) de processamento.
+	
+	Para cada nó da lista, uma tarefa foi criada com a diretiva \texttt{\#pragma omp task}. Cada tarefa recebe uma cópia do ponteiro para o nó atual e o identificador da thread que a criou (armazenado previamente). O código da tarefa imprime o nome do arquivo armazenado no nó, a thread que criou a tarefa e a thread que efetivamente a executou. Esse design permitiu observar de forma clara a distinção entre criação e execução de tarefas em um ambiente multithread.
+	
+	Por fim, ao término da execução paralela, a função \texttt{liberar\_lista()} é chamada para liberar a memória alocada para a lista encadeada, garantindo um uso adequado dos recursos do sistema
+	
+	Dessa forma, nossa \texttt{main()} ficou da seguinte forma:
+	
+	\begin{verbatim}
+		int main() {
+		    Node* lista = NULL;
+			
+		    adicionar_no(&lista, "arquivo1.txt");
+		    adicionar_no(&lista, "arquivo2.txt");
+		    adicionar_no(&lista, "arquivo3.txt");
+		    adicionar_no(&lista, "arquivo4.txt");
+		    adicionar_no(&lista, "arquivo5.txt");
+			
+		    #pragma omp parallel
+		    {
+		        #pragma omp single
+		        {
+		            printf("Thread %d está criando as tasks\n", omp_get_thread_num());
+		            Node* atual = lista;
+		            while (atual != NULL) {
+		                Node* no = atual;
+		                int criadora = omp_get_thread_num();
+						
+		                #pragma omp task firstprivate(no, criadora)
+		                {
+		                    printf("Arquivo: %s | Task criada pela thread: %d | 
+		                    Executada pela thread: %d\n",
+		                    no->nome_arquivo, criadora, omp_get_thread_num());
+		                }
+		                atual = atual->prox;
+		            }
+	        	}
+		    }
+			
+		    liberar_lista(lista);
+		    return 0;
+		}
+	\end{verbatim}
+	
+	\section{Resultados}
+	
+	\hspace{0.7cm}Para a análise dos resultados, o código foi executado em diferentes configurações, permitindo observar os efeitos das decisões implementadas. Na execução do código completo, sem alterações, obtivemos os seguintes resultados:
+	
+	\textbf{Primeira execução:}
+	\begin{verbatim}
+		Thread 1 está criando as tasks
+		Arquivo: arquivo1.txt | Task criada pela thread: 1 | Executada pela thread: 3
+		Arquivo: arquivo2.txt | Task criada pela thread: 1 | Executada pela thread: 2
+		Arquivo: arquivo5.txt | Task criada pela thread: 1 | Executada pela thread: 3
+		Arquivo: arquivo4.txt | Task criada pela thread: 1 | Executada pela thread: 0
+		Arquivo: arquivo3.txt | Task criada pela thread: 1 | Executada pela thread: 1
+	\end{verbatim}
+	
+	\textbf{Segunda execução:}
+	\begin{verbatim}
+		Thread 2 está criando as tasks
+		Arquivo: arquivo1.txt | Task criada pela thread: 2 | Executada pela thread: 3
+		Arquivo: arquivo5.txt | Task criada pela thread: 2 | Executada pela thread: 3
+		Arquivo: arquivo2.txt | Task criada pela thread: 2 | Executada pela thread: 1
+		Arquivo: arquivo3.txt | Task criada pela thread: 2 | Executada pela thread: 0
+		Arquivo: arquivo4.txt | Task criada pela thread: 2 | Executada pela thread: 2
+	\end{verbatim}
+	
+	A diretiva \texttt{\#pragma omp single} permite que apenas uma thread entre em seu escopo. Em nosso programa, ela foi utilizada para proteger o processo de criação das tasks, garantindo que apenas uma thread seja responsável por criá-las e adicioná-las à fila de execução. As demais threads, enquanto isso, ficam disponíveis para executar as tasks criadas.
+	
+	Nos resultados acima, observamos que, na primeira execução, a thread 1 foi responsável pela criação das tasks, enquanto na segunda execução, essa responsabilidade coube à thread 2. Isso mostra que a escolha da thread criadora é feita de forma não determinística, dependendo da estratégia de agendamento da OpenMP.
+	
+	Caso a diretiva \texttt{\#pragma omp single} não fosse utilizada, todas as threads presentes na região paralela executariam o mesmo trecho de código, criando múltiplas tasks para os mesmos arquivos. Isso resultaria em duplicações desnecessárias de tarefas, como ilustrado a seguir:
+	
+	\begin{verbatim}
+		Thread 3 está criando as tasks
+		Arquivo: arquivo1.txt | Task criada pela thread: 3 | Executada pela thread: 3
+		Arquivo: arquivo2.txt | Task criada pela thread: 3 | Executada pela thread: 3
+		Arquivo: arquivo3.txt | Task criada pela thread: 3 | Executada pela thread: 3
+		Arquivo: arquivo4.txt | Task criada pela thread: 3 | Executada pela thread: 3
+		Arquivo: arquivo5.txt | Task criada pela thread: 3 | Executada pela thread: 3
+		Thread 1 está criando as tasks
+		Arquivo: arquivo1.txt | Task criada pela thread: 1 | Executada pela thread: 3
+		Arquivo: arquivo3.txt | Task criada pela thread: 1 | Executada pela thread: 3
+		Thread 0 está criando as tasks
+		Arquivo: arquivo5.txt | Task criada pela thread: 1 | Executada pela thread: 0
+		Arquivo: arquivo1.txt | Task criada pela thread: 0 | Executada pela thread: 0
+		Arquivo: arquivo2.txt | Task criada pela thread: 0 | Executada pela thread: 0
+		Arquivo: arquivo3.txt | Task criada pela thread: 0 | Executada pela thread: 0
+		Arquivo: arquivo4.txt | Task criada pela thread: 0 | Executada pela thread: 0
+		Arquivo: arquivo5.txt | Task criada pela thread: 0 | Executada pela thread: 0
+		Thread 2 está criando as tasks
+		Arquivo: arquivo1.txt | Task criada pela thread: 2 | Executada pela thread: 0
+		Arquivo: arquivo4.txt | Task criada pela thread: 1 | Executada pela thread: 3
+		Arquivo: arquivo3.txt | Task criada pela thread: 2 | Executada pela thread: 3
+		Arquivo: arquivo5.txt | Task criada pela thread: 2 | Executada pela thread: 3
+		Arquivo: arquivo2.txt | Task criada pela thread: 1 | Executada pela thread: 1
+		Arquivo: arquivo2.txt | Task criada pela thread: 2 | Executada pela thread: 2
+		Arquivo: arquivo4.txt | Task criada pela thread: 2 | Executada pela thread: 0
+	\end{verbatim}
+	
+	Esse comportamento demonstra a importância do uso da diretiva \texttt{single} quando se deseja garantir que apenas uma instância de determinado trecho de código seja executada dentro de uma região paralela.
+	
+	Também foi realizada uma comparação entre o uso e a omissão da cláusula \texttt{firstprivate} na criação das tasks. Observou-se que, sem essa cláusula, todas as tarefas acabam acessando o mesmo ponteiro, resultando na repetição da mesma saída e na omissão dos demais arquivos. Com \texttt{firstprivate}, cada task recebe uma cópia independente do ponteiro para o nó atual, permitindo que o processamento seja feito corretamente e de forma paralela.
+	
+	\section{Conclusão}
+	
+	\hspace{0.7cm}A implementação de um programa utilizando lista encadeada e tarefas com OpenMP permitiu observar na prática o funcionamento da diretiva \texttt{\#pragma omp task} e seus impactos no paralelismo. O uso da diretiva \texttt{\#pragma omp single} se mostrou essencial para garantir que apenas uma thread criasse as tasks, evitando duplicidade no processamento dos nós da lista.
+	
+	Por fim, o comportamento não determinístico da execução, com diferentes threads criando e executando tasks a cada execução, reforça a importância da sincronização e do controle de acesso aos dados compartilhados. O domínio dessas técnicas é essencial para o desenvolvimento de aplicações paralelas eficientes, corretas e seguras.
 	
 	
 	
-	Também foram criadas funções como \texttt{criar\_no()} que cria um novo nó, \texttt{adicionar\_no} que adiciona um nó criado à lista encadeada
 	
-	diretiva \texttt{\#pragma omp single} para garantir que apenas uma thread fosse responsável pela criação das tarefas, enquanto todas as threads disponíveis na região paralela ficaram encarregadas de executá-las. Essa abordagem permitiu observar o comportamento dinâmico da distribuição das tarefas entre as threads, bem como analisar questões tais como concorrência, balanceamento de carga e ordem de execução.
-
-	 
 	
 \end{document}
