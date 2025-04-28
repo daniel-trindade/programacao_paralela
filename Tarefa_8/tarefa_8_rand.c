@@ -21,24 +21,30 @@ e nos efeitos do falso compartilhamento.
 #include <stdlib.h>
 #include <time.h>
 #include <omp.h>
+#include <sys/time.h>
 
-#define NUM_DOTS 10000000
+#define NUM_DOTS 100000000
+
+double get_time(struct timeval start, struct timeval end) {
+    return (end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) / 1e6;
+}
 
 int main() {
-    int hit = 0;
 
-    // Semente para o gerador de números aleatórios (será chamada em cada thread)
+    int hit = 0;
+    struct timeval inicio, fim;
+    double time_lapsed;
+
     srand(time(NULL));
 
-    // Região paralela
+    gettimeofday(&inicio, NULL);
+
     #pragma omp parallel default(none) shared(hit) 
     {
-        int hit_priv = 0; // Contador local da thread
+        int hit_priv = 0; 
 
-        // Loop de Monte Carlo dividido entre as threads
         #pragma omp for
         for(int i = 0; i < NUM_DOTS; i++){
-            // A função rand() não é thread-safe, o que pode gerar resultados incorretos
             double x = 2.0 * rand() / RAND_MAX - 1.0;
             double y = 2.0 * rand() / RAND_MAX - 1.0;
 
@@ -47,16 +53,18 @@ int main() {
             }
         }
 
-        // Acumulação protegida por seção crítica
         #pragma omp critical
         {
             hit += hit_priv;
         }
     }
 
-    // Estimativa final de pi
+    gettimeofday(&fim, NULL);
+    time_lapsed = get_time(inicio, fim);
     double pi = 4.0 * (double)hit / NUM_DOTS;
-    printf("Estimativa de Pi (com rand() e critical): %f\n", pi);
+
+    printf("Tempo gasto: %f segundos\n", time_lapsed);
+    printf("Estimativa de Pi com rand e critical: %f\n", pi);
 
     return 0;
 }
