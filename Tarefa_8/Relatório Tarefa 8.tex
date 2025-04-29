@@ -84,47 +84,6 @@
 	Em todas as versões foi utilizada a função \texttt{gettimeofday()} para registrar os tempos de execução e a quantidades de pontos geradas para todas as versões foi de {1.000.000.000}.		
 	
 	\section{Resultados}
-	 Cada experimento utilizou $10^8$ pontos gerados aleatoriamente e foi executado no mesmo ambiente computacional para garantir a comparação justa.
-	
-	Os resultados obtidos foram:
-	
-	\begin{itemize}
-		\item \textbf{Versão 1 — rand() com região crítica:}
-		\begin{itemize}
-			\item Tempo de execução: 13,270068 segundos
-			\item Estimativa de $\pi$: 3,141687
-		\end{itemize}
-		
-		\item \textbf{Versão 2 — rand\_r() com região crítica:}
-		\begin{itemize}
-			\item Tempo de execução: 0,6296 segundos
-			\item Estimativa de $\pi$: 3,141577
-		\end{itemize}
-		
-		\item \textbf{Versão 3 — rand() com vetor compartilhado:}
-		\begin{itemize}
-			\item Tempo de execução: 13,9920 segundos
-			\item Estimativa de $\pi$: 3,141661
-		\end{itemize}
-		
-		\item \textbf{Versão 4 — rand\_r() com vetor compartilhado:}
-		\begin{itemize}
-			\item Tempo de execução: 0,9164 segundos
-			\item Estimativa de $\pi$: 3,141621
-		\end{itemize}
-	\end{itemize}
-	
-	Observa-se que todas as versões forneceram estimativas bastante próximas do valor real de $\pi$ (aproximadamente 3,14159265), com diferenças esperadas para um método estocástico baseado em amostragem aleatória.
-	
-	Quanto ao desempenho, foi possível observar que:
-	
-	\begin{itemize}
-		\item As versões que utilizam \texttt{rand\_r()} apresentaram tempos de execução significativamente menores, devido à natureza \textit{thread-safe} desta função, que evita conflitos no acesso ao gerador de números aleatórios.
-		\item A eliminação da região crítica através do uso de um vetor compartilhado melhorou o desempenho, porém o uso da função \texttt{rand()} ainda limitou a velocidade nas versões correspondentes.
-		\item Mesmo nas versões vetorizadas, o falso compartilhamento pode ter impactado levemente o desempenho, pois múltiplas threads escrevem em posições adjacentes de memória, afetando a eficiência da cache.
-	\end{itemize}
-	
-	\section{Resultados}
 	
 	Cada experimento utilizou $10^8$ pontos gerados aleatoriamente e foi executado no mesmo ambiente computacional para garantir a comparação justa.
 	
