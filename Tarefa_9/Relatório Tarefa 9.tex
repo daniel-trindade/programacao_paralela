@@ -1,0 +1,31 @@
+\documentclass[a4paper, 12pt]{article}
+\usepackage[top=1.8cm, bottom=1.8cm, left=1.5cm, right=1.5cm]{geometry}
+\usepackage{amsmath}
+\usepackage{listings}
+\usepackage{float}
+\usepackage{tikz}
+
+
+\begin{document}
+	\begin{center}
+		Universidade Federal do Rio Grande do Norte
+		
+		Departamento de Engenharia da Computação e Automação
+		
+		DCA3703 - Programação Paralela
+		
+		\textbf{Tarefa 9 - Regiões críticas nomeadas e Locks explícitos}
+		
+		\textbf{Aluno:} Daniel Bruno Trindade da Silva
+	\end{center}
+	
+	\section{Introdução}
+	O presente trabalho tem como objetivo explorar o uso de paralelismo com a API OpenMP para manipulação segura de estruturas de dados compartilhadas — especificamente listas encadeadas — em ambientes concorrentes. Foram desenvolvidos dois programas que criam tarefas paralelas para realizar inserções em listas encadeadas, garantindo a integridade dos dados e evitando condições de corrida.
+	
+	O primeiro programa lida com duas listas encadeadas, cada uma associada a uma região crítica nomeada. Esse arranjo permite que múltiplas inserções ocorram simultaneamente, desde que sejam em listas diferentes, promovendo paralelismo eficiente. Já o segundo programa generaliza o cenário anterior para um número arbitrário de listas definido pelo usuário. Nesse caso, torna-se inviável o uso de regiões críticas nomeadas, sendo necessário empregar locks explícitos para garantir a exclusão mútua sem comprometer o desempenho.
+	
+	A seguir, serão apresentados os dois programas, acompanhados de uma análise das estratégias de sincronização utilizadas e das razões pelas quais o uso de locks se torna essencial na versão generalizada.
+
+	
+	
+\end{document}
