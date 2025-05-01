@@ -1,19 +1,3 @@
-/*
-Escreva um programa que cria tarefas para realizar
-N inserções em duas listas encadeadas, cada uma
-associada a uma thread. Cada tarefa deve escolher
-aleatoriamente em qual lista inserir um número.
-Garanta a integridade das listas evitando condição
-de corrida e, sempre que possível, use regiões
-críticas nomeadas para que a inserção em uma lista
-não bloqueie a outra. Em seguida, generalize o
-programa para um número de listas definido pelo
-usuário. Explique por que, nesse caso, regiões
-críticas nomeadas não são suficientes e por que
-o uso de locks explícitos se torna necessário.
-*/
-
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <omp.h>
@@ -66,12 +50,22 @@ double get_time(struct timeval start, struct timeval end) {
 }
 
 int main() {
-    Node* lista1 = NULL;
-    Node* lista2 = NULL;
+    int K, N;
     struct timeval inicio, fim;
-    int N = 200000;
 
-    unsigned int seed = time(NULL);
+    printf("Digite o número de listas: ");
+    scanf("%d", &K);
+    printf("Digite o número de inserções (tarefas): ");
+    scanf("%d", &N);
+
+    Node** listas = (Node**)malloc(K * sizeof(Node*));
+    omp_lock_t* locks = (omp_lock_t*)malloc(K * sizeof(omp_lock_t));
+    for (int i = 0; i < K; i++) {
+        listas[i] = NULL;
+        omp_init_lock(&locks[i]);
+    }
+
+    int seed = time(NULL);
 
     gettimeofday(&inicio, NULL);
 
@@ -83,30 +77,30 @@ int main() {
                 #pragma omp task
                 {
                     int valor = rand_r(&seed) % 100;
-                    int escolha = rand_r(&seed) % 2;
+                    int indice = rand_r(&seed) % K;
 
-                    if (escolha == 0) {
-                        #pragma omp critical(lista1)
-                        adicionar_no(&lista1, valor);
-                    } else {
-                        #pragma omp critical(lista2)
-                        adicionar_no(&lista2, valor);
-                    }
+                    omp_set_lock(&locks[indice]);
+                    adicionar_no(&listas[indice], valor);
+                    omp_unset_lock(&locks[indice]);
                 }
             }
         }
     }
 
     gettimeofday(&fim, NULL);
-    double time_lapsed = get_time(inicio, fim);
-    printf("Tempo gasto: %f segundos\n", time_lapsed);
-    //printf("Lista 1:\n");
-    //imprimir_lista(lista1);
-    //printf("Lista 2:\n");
-    //imprimir_lista(lista2);
+    double tempo = get_time(inicio, fim);
+    
 
-    liberar_lista(lista1);
-    liberar_lista(lista2);
+    printf("Tempo total: %.6f segundos\n", tempo);
+
+    for (int i = 0; i < K; i++) {
+        printf("Lista %d: ", i);
+        //imprimir_lista(listas[i]);
+        liberar_lista(listas[i]);
+        omp_destroy_lock(&locks[i]);
+    }
+
+    free(listas);
+    free(locks);
     return 0;
 }
-
