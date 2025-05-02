@@ -94,7 +94,7 @@ int main() {
     printf("Tempo total: %.6f segundos\n", tempo);
 
     for (int i = 0; i < K; i++) {
-        printf("Lista %d: ", i);
+        //printf("Lista %d: ", i);
         //imprimir_lista(listas[i]);
         liberar_lista(listas[i]);
         omp_destroy_lock(&locks[i]);
