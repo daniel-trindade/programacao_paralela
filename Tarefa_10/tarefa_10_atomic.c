@@ -3,8 +3,7 @@
 Pesquisar:
  - test_and_set
  - swap_and_compare
- - diferênça entre atomic e 
- - Reduction
+ - diferênça entre atomic e Reduction
 
 Implemente novamente o estimador da tarefa 8
 que usa contadores privados e o rand_r
@@ -61,10 +60,8 @@ int main() {
             }
         }
 
-        #pragma omp critical
-        {
+        #pragma omp atomic
             hit += hit_priv;
-        }
     }
 
     gettimeofday(&fim, NULL); 
