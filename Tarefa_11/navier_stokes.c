@@ -34,25 +34,24 @@ A clausula schedule os segunte atributos:
 #define DT 0.00001 // Passo de tempo
 #define NU 0.01    // Viscosidade
 #define NSTEPS 5000 // Número de passos de tempo
+#define SAVE_INTERVAL 100 // Salvar a cada 100 passos
 
 // Função para inicializar o campo de velocidade
 void initialize(double u[NX][NY][NZ]) {
     for (int i = 0; i < NX; i++) {
         for (int j = 0; j < NY; j++) {
             for (int k = 0; k < NZ; k++) {
-                u[i][j][k] = 0.0; // Inicialmente parado
+                u[i][j][k] = 0.0;
             }
         }
     }
-
-    // Pequena perturbação no centro
     int cx = NX / 2;
     int cy = NY / 2;
     int cz = NZ / 2;
     u[cx][cy][cz] = 1.0;
 }
 
-// Função para aplicar condições de contorno
+// Condições de contorno
 void apply_boundary_conditions(double u[NX][NY][NZ]) {
     for (int i = 0; i < NX; i++) {
         for (int j = 0; j < NY; j++) {
@@ -72,7 +71,7 @@ void apply_boundary_conditions(double u[NX][NY][NZ]) {
     }
 }
 
-// Função para atualizar o campo de velocidade
+// Atualização do campo
 void update(double u[NX][NY][NZ], double u_new[NX][NY][NZ]) {
     for (int i = 1; i < NX-1; i++) {
         for (int j = 1; j < NY-1; j++) {
@@ -80,11 +79,33 @@ void update(double u[NX][NY][NZ], double u_new[NX][NY][NZ]) {
                 double dudx2 = (u[i+1][j][k] - 2*u[i][j][k] + u[i-1][j][k]) / (DX*DX);
                 double dudy2 = (u[i][j+1][k] - 2*u[i][j][k] + u[i][j-1][k]) / (DY*DY);
                 double dudz2 = (u[i][j][k+1] - 2*u[i][j][k] + u[i][j][k-1]) / (DZ*DZ);
-
                 u_new[i][j][k] = u[i][j][k] + NU * DT * (dudx2 + dudy2 + dudz2);
             }
         }
     }
+}
+
+// Salva o campo de velocidade em arquivo
+void save_field(double u[NX][NY][NZ], int step) {
+    char filename[64];
+    sprintf(filename, "data/saida3d_%04d.dat", step);
+    FILE *fp = fopen(filename, "w");
+    if (!fp) {
+        perror("Erro ao abrir arquivo para escrita");
+        exit(1);
+    }
+
+    for (int i = 0; i < NX; i++) {
+        for (int j = 0; j < NY; j++) {
+            for (int k = 0; k < NZ; k++) {
+                fprintf(fp, "%f ", u[i][j][k]);
+            }
+            fprintf(fp, "\n");
+        }
+        fprintf(fp, "\n");
+    }
+
+    fclose(fp);
 }
 
 int main() {
@@ -96,30 +117,17 @@ int main() {
     for (int n = 0; n < NSTEPS; n++) {
         apply_boundary_conditions(u);
         update(u, u_new);
-
-        // Copia o novo campo para o antigo
         memcpy(u, u_new, sizeof(u));
 
-        // Imprime a velocidade no centro a cada 50 passos
         if (n % 50 == 0) {
             printf("Passo %d: Velocidade no centro = %f\n", n, u[NX/2][NY/2][NZ/2]);
         }
-    }
 
-    // Salva o campo final em um arquivo
-    FILE *fp = fopen("saida3d.dat", "w");
-    for (int i = 0; i < NX; i++) {
-        for (int j = 0; j < NY; j++) {
-            for (int k = 0; k < NZ; k++) {
-                fprintf(fp, "%f ", u[i][j][k]);
-            }
-            fprintf(fp, "\n");
+        if (n % SAVE_INTERVAL == 0) {
+            save_field(u, n);
         }
-        fprintf(fp, "\n"); // Separação entre planos de Z
     }
-    fclose(fp);
 
-    printf("Simulação 3D finalizada!\n");
-
+    printf("Simulação finalizada. Arquivos gerados para animação.\n");
     return 0;
 }
