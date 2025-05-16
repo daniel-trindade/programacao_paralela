@@ -25,16 +25,17 @@ A clausula schedule os segunte atributos:
 #include <string.h>
 #include <math.h>
 
-#define NX 20      // Número de pontos em x
-#define NY 20      // Número de pontos em y
-#define NZ 20      // Número de pontos em z
-#define DX 0.01    // Espaçamento em x
-#define DY 0.01    // Espaçamento em y
-#define DZ 0.01    // Espaçamento em z
-#define DT 0.00001 // Passo de tempo
-#define NU 0.01    // Viscosidade
-#define NSTEPS 5000 // Número de passos de tempo
-#define SAVE_INTERVAL 100 // Salvar a cada 100 passos
+#define NX 20                   // Número de pontos em x
+#define NY 20                   // Número de pontos em y
+#define NZ 20                   // Número de pontos em z
+#define DX 0.01                 // Espaçamento em x
+#define DY 0.01                 // Espaçamento em y
+#define DZ 0.01                 // Espaçamento em z
+#define DT 0.00001              // Passo de tempo
+#define NU 0.01                 // Viscosidade
+#define NSTEPS 5000             // Número de passos de tempo
+#define SAVE_INTERVAL 100       // Salvar a cada 100 passos
+
 
 // Função para inicializar o campo de velocidade
 void initialize(double u[NX][NY][NZ]) {
