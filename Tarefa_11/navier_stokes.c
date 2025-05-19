@@ -24,6 +24,7 @@ A clausula schedule os segunte atributos:
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <sys/time.h>
 
 #define NX 20                   // Número de pontos em x
 #define NY 20                   // Número de pontos em y
@@ -36,8 +37,13 @@ A clausula schedule os segunte atributos:
 #define NSTEPS 5000             // Número de passos de tempo
 #define SAVE_INTERVAL 100       // Salvar a cada 100 passos
 
+double get_time(struct timeval start, struct timeval end) {
+    return (end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) / 1e6;
+}
 
 // Função para inicializar o campo de velocidade
+// Inicializa todos os valores do campo como zero
+// e coloca uma perturbação no centro do domínio
 void initialize(double u[NX][NY][NZ]) {
     for (int i = 0; i < NX; i++) {
         for (int j = 0; j < NY; j++) {
@@ -53,6 +59,7 @@ void initialize(double u[NX][NY][NZ]) {
 }
 
 // Condições de contorno
+// Fecha as bordas do domínio com velocidade zero
 void apply_boundary_conditions(double u[NX][NY][NZ]) {
     for (int i = 0; i < NX; i++) {
         for (int j = 0; j < NY; j++) {
@@ -73,6 +80,7 @@ void apply_boundary_conditions(double u[NX][NY][NZ]) {
 }
 
 // Atualização do campo
+
 void update(double u[NX][NY][NZ], double u_new[NX][NY][NZ]) {
     for (int i = 1; i < NX-1; i++) {
         for (int j = 1; j < NY-1; j++) {
@@ -112,6 +120,10 @@ void save_field(double u[NX][NY][NZ], int step) {
 int main() {
     double u[NX][NY][NZ];
     double u_new[NX][NY][NZ];
+    struct timeval inicio, fim;
+    double time_lapsed;
+
+    gettimeofday(&inicio, NULL);
 
     initialize(u);
 
@@ -130,5 +142,10 @@ int main() {
     }
 
     printf("Simulação finalizada. Arquivos gerados para animação.\n");
+
+    gettimeofday(&fim, NULL);
+    time_lapsed = get_time(inicio, fim);
+    printf("Tempo total de execução: %f segundos\n", time_lapsed);
+
     return 0;
 }
