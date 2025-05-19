@@ -94,7 +94,7 @@ void apply_boundary_conditions(double u[NX][NY][NZ]) {
 
 // Atualização do campo - versão paralelizada
 void update(double u[NX][NY][NZ], double u_new[NX][NY][NZ]) {
-    #pragma omp parallel for collapse(3) schedule(dynamic, 100)
+    #pragma omp parallel for collapse(3) schedule(dynamic, 4)
     for (int i = 1; i < NX-1; i++) {
         for (int j = 1; j < NY-1; j++) {
             for (int k = 1; k < NZ-1; k++) {
@@ -180,7 +180,7 @@ void benchmark_schedules(double u[NX][NY][NZ], double u_new[NX][NY][NZ], int num
                     }
                     break;
                 case 1: // dynamic
-                    #pragma omp parallel for collapse(3) schedule(dynamic, 73)
+                    #pragma omp parallel for collapse(3) schedule(dynamic, 4)
                     for (int i = 1; i < NX-1; i++) {
                         for (int j = 1; j < NY-1; j++) {
                             for (int k = 1; k < NZ-1; k++) {
@@ -193,7 +193,7 @@ void benchmark_schedules(double u[NX][NY][NZ], double u_new[NX][NY][NZ], int num
                     }
                     break;
                 case 2: // guided
-                    #pragma omp parallel for collapse(3) schedule(guided, 2)
+                    #pragma omp parallel for collapse(3) schedule(guided, 4)
                     for (int i = 1; i < NX-1; i++) {
                         for (int j = 1; j < NY-1; j++) {
                             for (int k = 1; k < NZ-1; k++) {
@@ -265,7 +265,7 @@ int main() {
         benchmark_schedules(u, u_new, num_threads);
     }
     
-    // Executar a simulação completa com a melhor configuração (usar guided como exemplo)
+/*     // Executar a simulação completa com a melhor configuração (usar guided como exemplo)
     printf("\n=== Executando simulação completa ===\n");
     omp_set_num_threads(4); // Usar 4 threads para a simulação
     
@@ -292,6 +292,6 @@ int main() {
 
     printf("Tempo total de execução: %f segundos\n", time_lapsed);
     printf("Arquivos gerados para animação.\n");
-    
+     */
     return 0;
 }

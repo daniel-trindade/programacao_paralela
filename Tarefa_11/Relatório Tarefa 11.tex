@@ -21,7 +21,7 @@
 	\hspace{.62cm}Este relatório tem como objetivo apresentar o conhecimento adquirido durante a realização da Tarefa 11 da disciplina de \textbf{Computação Paralela}. A atividade consistiu em um estudo voltado à fixação dos conceitos relacionados às cláusulas \texttt{schedule} e \texttt{collapse}, bem como à análise de seus impactos em códigos paralelizados utilizando a biblioteca \textbf{OpenMP}.  
 	
 	\section{Enunciado}  
-	\hspace{.62cm}A tarefa trás como proposta a implementação de um código que simule a equação de Navier-Stokes e após sua validação, o desenvolvimento de uma versão paralelizada do código, seu enunciado pode ser encontrado a seguir:  
+	\hspace{.62cm}A tarefa traz como proposta a implementação de um código que simule a equação de Navier-Stokes e, após sua validação, o desenvolvimento de uma versão paralelizada do código. Seu enunciado pode ser encontrado a seguir:  
 	
 	\begin{quote}  
 		Escreva um código que simule o movimento de um fluido ao longo do tempo usando a equação de Navier-Stokes, considerando apenas os efeitos da viscosidade. Desconsidere a pressão e quaisquer forças externas. Utilize diferenças finitas para discretizar o espaço e simule a evolução da velocidade do fluido no tempo. Inicialize o fluido parado ou com velocidade constante e verifique se o campo permanece estável. Em seguida, crie uma pequena perturbação e observe se ela se difunde suavemente. Após validar o código, paralelize-o com OpenMP e explore o impacto das cláusulas schedule e collapse no desempenho da execução paralela.  
@@ -44,7 +44,7 @@
 	\end{itemize}  
 	
 	\subsection{Validação}  
-	Inicialmente, verificou-se a estabilidade do campo sem perturbações. Posteriormente, a introdução da perturbação no centro resultou em uma difusão suave, conforme esperado para um fluido viscoso. A evolução da velocidade no centro (\( u_{\text{centro}} \)) foi monitorada a cada 50 passos, exibindo um decaimento gradual (Figura 1).  
+	Inicialmente, verificou-se a estabilidade do campo sem perturbações. Posteriormente, a introdução da perturbação no centro resultou em uma difusão suave, conforme esperado para um fluido viscoso. A evolução da velocidade no centro (\( u_{\text{centro}} \)) foi monitorada a cada 50 passos, exibindo um decaimento gradual.  
 	
 	\begin{figure}[h]
 		\centering
@@ -56,12 +56,12 @@
 	O código foi paralelizado utilizando as seguintes estratégias:  
 	\begin{itemize}  
 		\item \textbf{Collapse}: A cláusula \texttt{collapse(3)} foi aplicada em loops aninhados para "achatar" a iteração tridimensional, aumentando o grau de paralelismo.  
-		\item \textbf{Schedule}: Foram testadas as políticas \texttt{static}, \texttt{dynamic}, \texttt{guided} e \texttt{auto}, com diferentes tamanhos de \textit{chunk}.  
-		\item \textbf{Regiões Críticas}: As funções \texttt{initialize}, \texttt{apply\_boundary\_conditions} e \texttt{update} foram paralelizadas, com distribuição de tarefas entre threads.  
+		\item \textbf{Schedule}: Foram testadas as políticas \texttt{static}, \texttt{dynamic}, \texttt{guided} e \texttt{auto}, com diferentes números de threads e de \textit{chunk}.  
+		\item \textbf{Regiões Críticas}: As funções \texttt{initialize}, \texttt{apply\_boundary\_conditions} e \texttt{update} foram paralelizadas, utilizando o \texttt{colapse} e \texttt{schedule}. 
 	\end{itemize}  
 	
 	\subsection{Análise de Desempenho}  
-	Um benchmark foi executado para comparar o desempenho da aplicação da clausula \texttt{schedule} variando os parâmetros (\texttt{static, dynamic,  guided e auto}) e o número de threads (1, 2, 4 e 8). Os resultados obtidos são:
+	Para comparar o desempenho da aplicação das configurações da cláusula \texttt{schedule}, variamos os parâmetros (\texttt{static}, \texttt{dynamic}, \texttt{guided} e \texttt{auto}) e o número de threads (1, 2, 4 e 8) em nossos testes e estes são os resultados obtidos:
 	
 	\begin{table}[htbp]
 		\centering
@@ -84,31 +84,21 @@
 		\label{tab:openmp_schedule_performance}
 	\end{table}  
 	
+	Esses testes foram executados em um computador com 16Gb de memória e com processador i3 10100f com 4 núcleos sendo 2 threads por núcleo. 
+	
+	Analisando os resultados temos:
 	
 	\begin{itemize}  
-		\item \texttt{static}: Distribui as iterações de forma cíclica e uniforme entre as threads. Teve um bom desempenho pois o problema trabalhado é homogêneo com cálculos regulares    
-		\item \texttt{dynamic}: Teve o pior desempenho devido ao \textit{overhead} causado pelo gerenciamento das tarefas. O tamanho \textit{chunk} também influenciou negativamente, pois quanto menor for o \textit{chunk} maior carga de gerenciamento será imposta. Essa configuração é ideal para casos com iterações altamente desbalanceadas, o que não é nosso caso;  
-		\item \texttt{guided}: Apresentou melhor balanceamento para malhas tridimensionais, reduzindo o tempo de execução em 38\% com 4 threads (Tabela 1).  
+		\item \texttt{static}: Teve um bom desempenho devido ao fato de que o problema é homogêneo, ou seja, suas iterações são balanceadas e com cálculos regulares;
+		\item \texttt{dynamic}: Apresentou o pior desempenho devido ao \textit{overhead} de gerenciamento. Testes com chunk maior melhoraram o desempenho em cerca de 1s, mas ainda inferior às demais políticas. Essa configuração é mais adequada para cargas desbalanceadas;
+		\item \texttt{guided}: Teve desempenho muito próximo ao \texttt{static}, e seria vantajosa em casos com maior variação de carga, dado seu bom balanceamento com baixo \textit{overhead};
+		\item \texttt{auto}: Teve desempenho similar ao \texttt{static}, sugerindo que o runtime escolheu essa estratégia internamente.
 	\end{itemize}  
 	
-	\begin{table}[h]  
-		\centering  
-		\caption{Tempos de execução (100 passos) para 4 threads}  
-		\begin{tabular}{|l|c|}  
-			\hline  
-			\textbf{Schedule} & \textbf{Tempo (s)} \\  
-			\hline  
-			static & 1.24 \\  
-			dynamic & 1.05 \\  
-			guided & 0.89 \\  
-			auto & 1.12 \\  
-			\hline  
-		\end{tabular}  
-	\end{table}  
-	
-	Na simulação completa (\( N_{\text{steps}} = 5000 \)), a versão paralelizada com \texttt{guided} e 4 threads atingiu um speedup de 3.2× em relação à versão serial, com tempo total de 12.7 segundos.  
-	
 	\section{Conclusão}  
-	\hspace{.62cm}A tarefa permitiu explorar práticas de paralelização em problemas computacionalmente intensivos. A cláusula \texttt{collapse} mostrou-se essencial para otimizar loops multidimensionais, enquanto a escolha do \texttt{schedule} impactou diretamente a escalabilidade. O uso de \texttt{guided} com 4 threads demonstrou ser a configuração mais eficiente para a malha em questão, equilibrando carga e overhead.  
+	\hspace{.62cm}A realização da Tarefa 11 permitiu consolidar conceitos fundamentais da programação paralela utilizando a biblioteca OpenMP, com foco nas cláusulas \texttt{collapse} e \texttt{schedule}. Observou-se que a utilização de \texttt{collapse(3)} foi essencial para aumentar o grau de paralelismo ao distribuir eficientemente as iterações dos loops aninhados em três dimensões.  
 	
+	Em relação à cláusula \texttt{schedule}, os testes demonstraram que a política \texttt{static} teve o melhor desempenho geral, especialmente com 4 e 8 threads, devido à natureza homogênea da carga de trabalho. A política \texttt{dynamic}, por outro lado, apresentou desempenho inferior devido ao alto overhead de gerenciamento, pouco vantajoso em um problema com iterações balanceadas. Já a política \texttt{guided} apresentou desempenho competitivo, indicando potencial em contextos com maior variabilidade de carga. A opção \texttt{auto} mostrou desempenho semelhante ao \texttt{static}, o que sugere que o compilador identificou corretamente a melhor estratégia para o cenário.
+	
+	Com isso, conclui-se que a escolha adequada de estratégias de paralelização tem impacto direto no desempenho de aplicações paralelas. O domínio das cláusulas \texttt{schedule} e \texttt{collapse} é essencial para maximizar o aproveitamento dos recursos computacionais, especialmente em simulações científicas com grandes volumes de dados. Esta tarefa proporcionou uma experiência prática valiosa, permitindo observar na prática como diferentes abordagens afetam o desempenho e a escalabilidade do código.
 \end{document}
