@@ -1,0 +1,29 @@
+\documentclass[a4paper, 12pt]{article}
+\usepackage[top=1.8cm, bottom=1.8cm, left=1.5cm, right=1.5cm]{geometry}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{graphicx}
+
+\begin{document}
+	\begin{center}
+		Universidade Federal do Rio Grande do Norte
+		
+		Departamento de Engenharia da Computação e Automação  
+		
+		DCA3703 - Programação Paralela  
+		
+		\textbf{Tarefa 12: Avaliação da Escalabilidade}  
+		
+		\textbf{Aluno:} Daniel Bruno Trindade da Silva  
+	\end{center}  
+	
+	\section{Introdução}  
+	\hspace{.62cm}Este relatório tem como objetivo apresentar o conhecimento adquirido durante a realização da Tarefa 12 da disciplina de \textbf{Computação Paralela}. A atividade consistiu em avaliar a escalabilidade do programa desenvolvido na tarefa 11 (Simulador de velocidade de um fluido utilizando a equação de Navier-Stokes) utilizando o super computador NPAD da Universidade Federal do Rio Grande do Norte.  
+	
+	\section{Enunciado}    
+	\hspace{.62cm} Avalie a escalabilidade do seu código de Navier-Strokes utilizando algum nó de computação do NPAD. Procure identificar gargalos de escalabilidade e reporte o seu progresso em versões sucessivas da evolução do código otimizado. Comente sobre a escalabilidade, a escalabilidade fraca e a escalabilidade fortes das versões.  
+	
+	\section{Desenvolvimento}
+	\hspace{.62cm}Na Tarefa 11, desenvolvemos duas versões de um programa para simular o a velocidade de um fluido: uma versão sequencial (serial) e outra paralelizada com OpenMP. Para a análise de escalabilidade, utilizamos a versão paralela. A função \texttt{main} do código foi reorganizada de forma que seu conteúdo foi encapsulado em um laço de repetição, que executa toda a simulação diversas vezes, variando progressivamente o número de threads utilizadas. A cada iteração, o número de threads é dobrado (1, 2, 4, 8, ...), permitindo a coleta dos tempos de execução para diferentes níveis de paralelismo. Dessa forma, é possível avaliar o comportamento do programa em termos de escalabilidade forte, identificando possíveis gargalos e analisando o ganho de desempenho à medida que mais threads são utilizadas.
+
+\end{document}
