@@ -94,7 +94,7 @@ void apply_boundary_conditions(double u[NX][NY][NZ]) {
 
 // Atualização do campo - versão paralelizada
 void update(double u[NX][NY][NZ], double u_new[NX][NY][NZ]) {
-    #pragma omp parallel for collapse(3) schedule(dynamic, 4)
+    #pragma omp parallel for collapse(3) schedule(dynamic, 100)
     for (int i = 1; i < NX-1; i++) {
         for (int j = 1; j < NY-1; j++) {
             for (int k = 1; k < NZ-1; k++) {
@@ -149,19 +149,19 @@ void save_field(double u[NX][NY][NZ], int step) {
 void benchmark_schedules(double u[NX][NY][NZ], double u_new[NX][NY][NZ], int num_threads) {
     struct timeval start_time, end_time;
     double times[4]; // Para armazenar os tempos de diferentes schedules
-    char* schedule_names[4] = {"static", "dynamic", "guided", "auto"};
+    char* schedule_names[5] = {"static", "dynamic", "guided", "auto", "default"};
     
     // Configurar o número de threads
     omp_set_num_threads(num_threads);
     
     // Testes com diferentes schedules
-    for (int test = 0; test < 4; test++) {
+    for (int test = 0; test < 5; test++) {
         // Reinicializar arrays
         initialize(u);
         
         gettimeofday(&start_time, NULL);
         
-        for (int n = 0; n < 100; n++) { // Teste com 100 passos de tempo
+        for (int n = 0; n < 100000; n++) { // Teste com 100 passos de tempo
             apply_boundary_conditions(u);
             
             // Diferentes schedules para teste
@@ -180,7 +180,7 @@ void benchmark_schedules(double u[NX][NY][NZ], double u_new[NX][NY][NZ], int num
                     }
                     break;
                 case 1: // dynamic
-                    #pragma omp parallel for collapse(3) schedule(dynamic, 4)
+                    #pragma omp parallel for collapse(3) schedule(dynamic, 73)
                     for (int i = 1; i < NX-1; i++) {
                         for (int j = 1; j < NY-1; j++) {
                             for (int k = 1; k < NZ-1; k++) {
@@ -207,6 +207,19 @@ void benchmark_schedules(double u[NX][NY][NZ], double u_new[NX][NY][NZ], int num
                     break;
                 case 3: // auto
                     #pragma omp parallel for collapse(3) schedule(auto)
+                    for (int i = 1; i < NX-1; i++) {
+                        for (int j = 1; j < NY-1; j++) {
+                            for (int k = 1; k < NZ-1; k++) {
+                                double dudx2 = (u[i+1][j][k] - 2*u[i][j][k] + u[i-1][j][k]) / (DX*DX);
+                                double dudy2 = (u[i][j+1][k] - 2*u[i][j][k] + u[i][j-1][k]) / (DY*DY);
+                                double dudz2 = (u[i][j][k+1] - 2*u[i][j][k] + u[i][j][k-1]) / (DZ*DZ);
+                                u_new[i][j][k] = u[i][j][k] + NU * DT * (dudx2 + dudy2 + dudz2);
+                            }
+                        }
+                    }
+                    break;
+                case 4: // static
+                    #pragma omp parallel for collapse(3)
                     for (int i = 1; i < NX-1; i++) {
                         for (int j = 1; j < NY-1; j++) {
                             for (int k = 1; k < NZ-1; k++) {

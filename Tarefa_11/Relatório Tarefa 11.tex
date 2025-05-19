@@ -61,10 +61,33 @@
 	\end{itemize}  
 	
 	\subsection{Análise de Desempenho}  
-	Um benchmark foi executado para comparar o desempenho com 1, 2, 4 e 8 threads. Os resultados mostraram que:  
+	Um benchmark foi executado para comparar o desempenho da aplicação da clausula \texttt{schedule} variando os parâmetros (\texttt{static, dynamic,  guided e auto}) e o número de threads (1, 2, 4 e 8). Os resultados obtidos são:
+	
+	\begin{table}[htbp]
+		\centering
+		\caption{Comparação de desempenho entre configurações de schedule OpenMP (tempo em segundos)}
+		
+		\vspace{1cm}
+		\begin{tabular}{|c|c|c|c|c|}
+			\hline
+			\textbf{Threads} & \textbf{Static} & \textbf{Dynamic (4)} & \textbf{Guided} & \textbf{Auto} \\
+			\hline
+			1 & 10.596022 & 12.877296 & 10.612986 & 10.582557 \\
+			\hline
+			2 & 5.880238 & 8.701045 & 5.841041 & 5.826200 \\
+			\hline
+			4 & 3.559344 & 5.797681 & 3.514549 & 3.546131 \\
+			\hline
+			8 & 3.385047 & 5.076297 & 3.595373 & 3.433562 \\
+			\hline
+		\end{tabular}
+		\label{tab:openmp_schedule_performance}
+	\end{table}  
+	
+	
 	\begin{itemize}  
-		\item \texttt{static}: Eficiente para cargas uniformes, mas com menor escalabilidade em threads múltiplas.  
-		\item \texttt{dynamic}: Adaptativo a cargas desbalanceadas, porém com overhead de sincronização.  
+		\item \texttt{static}: Distribui as iterações de forma cíclica e uniforme entre as threads. Teve um bom desempenho pois o problema trabalhado é homogêneo com cálculos regulares    
+		\item \texttt{dynamic}: Teve o pior desempenho devido ao \textit{overhead} causado pelo gerenciamento das tarefas. O tamanho \textit{chunk} também influenciou negativamente, pois quanto menor for o \textit{chunk} maior carga de gerenciamento será imposta. Essa configuração é ideal para casos com iterações altamente desbalanceadas, o que não é nosso caso;  
 		\item \texttt{guided}: Apresentou melhor balanceamento para malhas tridimensionais, reduzindo o tempo de execução em 38\% com 4 threads (Tabela 1).  
 	\end{itemize}  
 	
