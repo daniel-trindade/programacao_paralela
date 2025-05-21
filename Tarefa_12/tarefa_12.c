@@ -8,6 +8,9 @@ evolução do código otimizado. Comente
 sobre a escalabilidade, a escalabilidade
 fraca e a escalabilidade fortes das
 versões
+
+srun --partition=intel-128 --cpus-per-task=4 --time=00:05:00 --pty bashD
+
 */
 
 #include <stdio.h>
@@ -24,9 +27,9 @@ versões
 #define DZ 0.01                 // Espaçamento em z
 #define DT 0.00001              // Passo de tempo
 #define NU 0.01                 // Viscosidade
-#define NSTEPS 100000             // Número de passos de tempo
+#define NSTEPS 10000             // Número de passos de tempo
 #define SAVE_INTERVAL 100       // Salvar a cada 100 passos
-#define MAX_THREADS 8
+#define MAX_THREADS 32
 
 // Função para inicializar o campo de velocidade
 // Inicializa todos os valores do campo como zero
@@ -79,22 +82,7 @@ void apply_boundary_conditions(double u[NX][NY][NZ]) {
 
 // Atualização do campo - versão paralelizada
 void update(double u[NX][NY][NZ], double u_new[NX][NY][NZ]) {
-    #pragma omp parallel for collapse(3) schedule(dynamic, 4)
-    for (int i = 1; i < NX-1; i++) {
-        for (int j = 1; j < NY-1; j++) {
-            for (int k = 1; k < NZ-1; k++) {
-                double dudx2 = (u[i+1][j][k] - 2*u[i][j][k] + u[i-1][j][k]) / (DX*DX);
-                double dudy2 = (u[i][j+1][k] - 2*u[i][j][k] + u[i][j-1][k]) / (DY*DY);
-                double dudz2 = (u[i][j][k+1] - 2*u[i][j][k] + u[i][j][k-1]) / (DZ*DZ);
-                u_new[i][j][k] = u[i][j][k] + NU * DT * (dudx2 + dudy2 + dudz2);
-            }
-        }
-    }
-}
-
-// Versão alternativa usando guided schedule
-void update_guided(double u[NX][NY][NZ], double u_new[NX][NY][NZ]) {
-    #pragma omp parallel for collapse(3) schedule(guided, 2)
+    #pragma omp parallel for collapse(3) schedule(static)
     for (int i = 1; i < NX-1; i++) {
         for (int j = 1; j < NY-1; j++) {
             for (int k = 1; k < NZ-1; k++) {
@@ -153,7 +141,7 @@ int main() {
 
         for (int n = 0; n < NSTEPS; n++) {
             apply_boundary_conditions(u);
-            update_guided(u, u_new);
+            update(u, u_new);
             memcpy(u, u_new, sizeof(u));
         }
 

@@ -265,7 +265,7 @@ int main() {
         benchmark_schedules(u, u_new, num_threads);
     }
     
-/*     // Executar a simulação completa com a melhor configuração (usar guided como exemplo)
+    // Executar a simulação completa com a melhor configuração (usar guided como exemplo)
     printf("\n=== Executando simulação completa ===\n");
     omp_set_num_threads(4); // Usar 4 threads para a simulação
     
@@ -292,6 +292,6 @@ int main() {
 
     printf("Tempo total de execução: %f segundos\n", time_lapsed);
     printf("Arquivos gerados para animação.\n");
-     */
+
     return 0;
 }
