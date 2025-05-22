@@ -5,7 +5,11 @@
 \usepackage{graphicx}
 \usepackage{float}
 \usepackage{pgfplots}
+\usepackage[brazilian]{babel}
 \pgfplotsset{compat=1.18}
+
+\usepackage[table]{xcolor}
+\usepackage{colortbl}
 
 \begin{document}
 	\begin{center}
@@ -30,7 +34,11 @@
 	\hspace{.62cm}Na Tarefa 11, desenvolvemos duas versões de um programa para simular a velocidade de um fluido: uma versão sequencial (serial) e outra paralelizada com OpenMP. Para a análise de escalabilidade, utilizamos a versão paralela. Foram realizados dois testes de escalabilidade:
 	
 	\begin{itemize}
-		\item \textbf{Escalabilidade Forte} - Nesse teste, fixamos o tamanho do problema e aumentamos os recursos computacionais utilizados. Neste caso, foi feito um aumento gradual do número de \textit{threads} na execução. O código foi executado utilizando 1, 2, 4, 8, 16 e 32 \textit{threads}. A partir do tempo despendido em cada uma das execuções, podemos verificar como ficou a eficiência do programa.
+		\item \textbf{Escalabilidade Forte} - Nesse teste, fixamos o tamanho do problema e aumentamos os recursos computacionais utilizados. Neste caso, foi feito um aumento gradual do número de \textit{threads} na execução. O código foi executado utilizando 1, 2, 4, 8, 16 e 32 \textit{threads}. A partir do tempo despendido em cada uma das execuções, podemos verificar o \textit{speedup}(S) e o ganho de eficiência(E) do programada seguinte forma:
+		\[
+			\text{Speedup}(p) = \frac{T(1)}{T(p)}  \hspace{1cm} \text{E}(p) = \frac{S}{p}
+		\]
+		Onde \textit{p} é o número de processadores (\textit{threads}), T(1) o tempo da execução serial, T(p) o tempo com \textit{p} processadores
 		
 		\item \textbf{Escalabilidade Fraca} - Para avaliarmos esse item, fixamos o poder computacional na utilização de 8 \textit{threads} e começamos a aumentar o tamanho da matriz tridimensional utilizada no problema. O código inicia com uma matriz 20x20x20 e, gradualmente, dobramos uma das dimensões: 20x20x40, 20x20x80, até 20x20x320. Com o tempo despendido em cada uma das execuções, podemos identificar se há um crescimento linear ou não, o que indicará se há uma boa escalabilidade fraca.
 	\end{itemize}
@@ -38,15 +46,17 @@
 	 Dessa forma, é possível avaliar o comportamento do programa em termos de escalabilidade forte, identificando possíveis gargalos e analisando o ganho de desempenho à medida que mais threads são utilizadas.
 	 
 	 \section{Resultados}
-	 \subsection{Escalabilidade Forte}
-	 \begin{table}[H]
+	 \subsection{Escalabilidade Forte}	 
+	 	\begin{table}[H]
 	 	\centering
 	 	\begin{tabular}{|c|c|c|c|c|c|c|}
 	 		\hline
 	 		\textbf{Threads} & 1 & 2 & 4 & 8 & 16 & 32 \\ \hline
-	 		\textbf{Tempo (s)} & 1,365252 & 0,820158 & 0,532595 & 0,401583 & 0,356672 & 0,401173 \\ \hline
+	 		\textbf{Tempo (s)} & 1.3652 & 0.8201 & 0.5325 & 0.4015 & 0.3566 & 0.4011 \\ \hline
+	 		\textbf{Speedup} & 1.000 & 1.664 & 2.564 & 3.401 & 3.830 & 3.404 \\ \hline
+	 		\textbf{Eficiência} & 1.000 & 0.832 & 0.641 & 0.425 & 0.239 & 0.106 \\ \hline
 	 	\end{tabular}
-	 	\caption{Resultados do teste de Escalabilidade Forte}
+	 	\caption{Speedup e Eficiência - Escalabilidade Forte}
 	 \end{table}
 	 
 	 \begin{figure}[H]
@@ -61,7 +71,7 @@
 	 			ytick={0,1,2,3,4,5},
 	 			grid=both,
 	 			width=10cm,
-	 			height=7cm,
+	 			height=6cm,
 	 			mark size=3pt
 	 			]
 	 			\addplot[
@@ -92,7 +102,7 @@
 	 		Tempo (s) & 0,401583 s & 0,726705 s & 1,375313 s & 2,675813 s & 5,387217 s \\
 	 		\hline
 	 	\end{tabular}
-	 	\caption{Resultados do teste de escalabilidade fraca variando a dimensão da matriz.}
+	 	\caption{Resultados do teste de escalabilidade fraca variando a dimensão da matriz e fixando as threads em 8.}
 	 	\label{tab:esc_fraca}
 	 \end{table}
 	 
@@ -129,6 +139,35 @@
 	 	\caption{Gráfico de escalabilidade fraca: tempo de execução conforme o aumento da dimensão da matriz.}
 	 	\label{fig:esc_fraca}
 	 \end{figure}
+	 
+	 \subsection{Tabela de Escalabilidade do Programa}
+	 \begin{table}[H]
+	 	\centering
+	 	\begin{tabular}{|c|c|c|c|c|c|c|}
+	 		\hline
+	 		\textbf{\# Threads} & \textbf{20x20x20} & \textbf{20x20x40} & \textbf{20x20x80} & \textbf{20x20x160} & \textbf{20x20x320} & \textbf{20x20x640} \\ \hline
+	 		1 & \cellcolor{yellow!20} 1.00 & 1.00 & 1.00 & 1.00 & 1.00 & 1.00 \\ \hline
+	 		2 & 0.83 & \cellcolor{yellow!20}0.86 & 0.89 & 0.91 & 0.92 & 0.95 \\ \hline
+	 		4 & 0.64 & 0.71 & \cellcolor{yellow!20} 0.75 & 0.77 & 0.80 & 0.83 \\ \hline
+	 		8 & 0.43 & 0.51 & 0.56 & \cellcolor{yellow!20} 0.58 & 0.62 & 0.66 \\ \hline
+	 		16 & 0.24 & 0.32 & 0.39 & 0.43 & \cellcolor{yellow!20} 0.48 & 0.52 \\ \hline
+	 		32 & 0.11 & 0.16 & 0.19 & 0.22 & 0.25 & \cellcolor{yellow!20} 0.28 \\ \hline
+	 	\end{tabular}
+	 	\caption{Eficiência para diferentes tamanhos de problema e número de threads}
+	 \end{table}
+	 
+	 \section{Análise dos Resultados}
+	 
+	 \hspace{0.68cm}Através dos resultados obtidos, foi possível perceber que o programa em análise apresenta uma boa \textbf{Escalabilidade Forte} até a utilização de 16 \textit{threads}. A partir da execução com 32 \textit{threads}, observa-se uma degradação, com uma perda significativa de \textit{speedup} e eficiência. Esse comportamento pode ser claramente visualizado na Figura 1.
+	 
+	 \hspace{0.68cm}Com relação à \textbf{Escalabilidade Fraca}, foi possível observar que a eficiência tende a aumentar, enquanto o tempo de execução cresce de forma aproximadamente linear com o aumento do tamanho do problema. Esse comportamento indica que o programa é capaz de escalar bem conforme o problema cresce, ou seja, possui uma boa escalabilidade fraca.
+	 
+	 \section{Conclusão}
+	 
+	 \hspace{0.68cm}A partir dos testes realizados, foi possível concluir que a versão paralelizada do programa apresentou um bom desempenho em termos de escalabilidade. Na análise de \textbf{Escalabilidade Forte}, observou-se ganhos significativos de \textit{speedup} e eficiência até a utilização de 16 \textit{threads}, com uma posterior degradação ao se utilizar 32 \textit{threads}, possivelmente devido à sobrecarga de gerenciamento das \textit{threads} e limitações de hardware.
+	 
+	 \hspace{0.68cm}Já na análise de \textbf{Escalabilidade Fraca}, o programa demonstrou ser capaz de lidar eficientemente com o aumento do tamanho do problema, mantendo ou melhorando a eficiência conforme a carga computacional cresce. Assim, conclui-se que o programa possui uma boa capacidade de escalabilidade, tanto em cenários de aumento de recursos quanto de expansão do problema, validando a eficácia da paralelização implementada com OpenMP.
+	 
 	 
 	 
 	 
