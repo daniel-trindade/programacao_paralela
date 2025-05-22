@@ -29,7 +29,7 @@ srun --partition=intel-128 --cpus-per-task=4 --time=00:05:00 --pty bashD
 #define NU 0.01                 // Viscosidade
 #define NSTEPS 10000             // Número de passos de tempo
 #define SAVE_INTERVAL 100       // Salvar a cada 100 passos
-#define MAX_THREADS 32
+#define MAX_THREADS 8
 
 // Função para inicializar o campo de velocidade
 // Inicializa todos os valores do campo como zero
