@@ -1,0 +1,47 @@
+Matriz=20x20x20
+Threads: 1 | Tempo médio: 1.4268 s | Desvio: 0.0052 s
+Threads: 2 | Tempo médio: 0.8417 s | Desvio: 0.0014 s
+Threads: 4 | Tempo médio: 0.5292 s | Desvio: 0.0006 s
+Threads: 8 | Tempo médio: 0.3943 s | Desvio: 0.0015 s
+Threads: 16 | Tempo médio: 0.3572 s | Desvio: 0.0012 s
+Threads: 32 | Tempo médio: 0.4138 s | Desvio: 0.0003 s
+
+Matriz=20x20x40
+Threads: 1 | Tempo médio: 2.9858 s | Desvio: 0.0022 s
+Threads: 2 | Tempo médio: 1.7215 s | Desvio: 0.0016 s
+Threads: 4 | Tempo médio: 1.0385 s | Desvio: 0.0008 s
+Threads: 8 | Tempo médio: 0.7239 s | Desvio: 0.0017 s
+Threads: 16 | Tempo médio: 0.5716 s | Desvio: 0.0006 s
+Threads: 32 | Tempo médio: 0.6291 s | Desvio: 0.0002 s
+
+Matrix=20x20x80
+Threads: 1 | Tempo médio: 6.2071 s | Desvio: 0.0009 s
+Threads: 2 | Tempo médio: 3.4470 s | Desvio: 0.0011 s
+Threads: 4 | Tempo médio: 2.0386 s | Desvio: 0.0009 s
+Threads: 8 | Tempo médio: 1.3653 s | Desvio: 0.0002 s
+Threads: 16 | Tempo médio: 0.9895 s | Desvio: 0.0004 s
+Threads: 32 | Tempo médio: 1.0006 s | Desvio: 0.0003 s
+
+Matrix=20x20x160
+Threads: 1 | Tempo médio: 12.4911 s | Desvio: 0.0102 s
+Threads: 2 | Tempo médio: 6.8481 s | Desvio: 0.0026 s
+Threads: 4 | Tempo médio: 4.0160 s | Desvio: 0.0011 s
+Threads: 8 | Tempo médio: 2.6444 s | Desvio: 0.0005 s
+Threads: 16 | Tempo médio: 1.7840 s | Desvio: 0.0003 s
+Threads: 32 | Tempo médio: 1.7867 s | Desvio: 0.0023 s
+
+Matrix=20x20x320
+Threads: 1 | Tempo médio: 30.2435 s | Desvio: 0.0869 s
+Threads: 2 | Tempo médio: 16.2868 s | Desvio: 0.1278 s
+Threads: 4 | Tempo médio: 9.4114 s | Desvio: 0.1141 s
+Threads: 8 | Tempo médio: 5.7925 s | Desvio: 0.0663 s
+Threads: 16 | Tempo médio: 5.4038 s | Desvio: 0.0953 s
+Threads: 32 | Tempo médio: 3.6794 s | Desvio: 0.0785 s
+
+Matrix=20x20x640
+Threads: 1 | Tempo médio: 61.3349 s | Desvio: 0.0083 s
+Threads: 2 | Tempo médio: 31.9798 s | Desvio: 0.0045 s
+Threads: 4 | Tempo médio: 18.5639 s | Desvio: 0.0031 s
+Threads: 8 | Tempo médio: 11.7225 s | Desvio: 0.0005 s
+Threads: 16 | Tempo médio: 7.6019 s | Desvio: 0.0006 s
+Threads: 32 | Tempo médio: 7.0821 s | Desvio: 0.0011 s
