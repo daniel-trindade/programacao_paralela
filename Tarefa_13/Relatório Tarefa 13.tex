@@ -17,25 +17,38 @@
 		\textbf{Aluno:} Daniel Bruno Trindade da Silva  
 	\end{center}  
 	
-	\section{Introdução}  
-	\hspace{.62cm}Este relatório tem como objetivo apresentar o conhecimento adquirido durante a realização da Tarefa 13 da disciplina de \textbf{Computação Paralela}. A atividade consistiu em avaliar a escalabilidade do programa desenvolvido na tarefa 11 (Simulador de velocidade de um fluido utilizando a equação de Navier-Stokes) aplicando diferentes politicas de afinidade de \textit{threads}.
+	\section{Introdução}
 	
-	\section{Enunciado}    
-	\hspace{.62cm} Avalie como a escalabilidade do seu código de Navier-Strokes muda ao utilizar os diversos tipos de afinidades de threads suportados pelo sistema operacional e pelo OpenMP no mesmo nó de computação do NPAD que utilizou para a tarefa 12.
+	\hspace{0.62cm}Este relatório tem como objetivo apresentar os conhecimentos adquiridos durante a realização da Tarefa 13 da disciplina de \textbf{Computação Paralela}. A atividade consistiu em avaliar a escalabilidade do programa desenvolvido na Tarefa 11 — um simulador da velocidade de um fluido utilizando a equação de Navier-Stokes — aplicando diferentes políticas de afinidade de \textit{threads}.
+	
+	\section{Enunciado}
+	
+	\hspace{0.62cm}Avalie como a escalabilidade do seu código de Navier-Stokes muda ao utilizar os diversos tipos de afinidades de \textit{threads} suportados pelo sistema operacional e pelo OpenMP, no mesmo nó de computação do NPAD utilizado para a Tarefa 12.
 	
 	\section{Desenvolvimento}
-	\hspace{.62cm}Na Tarefa 11, desenvolvemos duas versões de um programa para simular a velocidade de um fluido: uma versão sequencial (serial) e outra paralelizada com OpenMP. Para a análise requerida nessa tarefa utilizaremos a versão paralelizada do código.
 	
-	A analise alvo dessa tarefa requer que utilizemos a cláusula \texttt{proc\_bind()}, com os seguintes parametros:
+	\hspace{0.62cm}Na Tarefa 11, desenvolvemos duas versões de um programa para simular a velocidade de um fluido: uma versão sequencial (serial) e outra paralelizada com OpenMP. Para a análise requerida nesta tarefa, utilizamos a versão paralelizada do código.
+	
+	\hspace{0.62cm}Nesta tarefa, analisamos os impactos da cláusula \texttt{proc\_bind()} com as seguintes políticas de afinidade:
 	
 	\begin{itemize}
-		\item \textbf{\texttt{spread}}
-		\item \textbf{\texttt{close}}
-		\item \textbf{\texttt{master}}
-		\item \textbf{\texttt{true}}
-		\item \textbf{\texttt{false}}
-	\end{itemize}  
+		\item \textbf{\texttt{spread}} — distribui as \textit{threads} de forma espalhada pelos processadores, maximizando a distância entre elas. O objetivo é utilizar o máximo de recursos de hardware possível, como diferentes \textit{sockets}, nós NUMA ou núcleos físicos.
+		
+		\item \textbf{\texttt{close}} — agrupa as \textit{threads} próximas umas das outras, preferencialmente no mesmo \textit{socket}, nó NUMA ou núcleos adjacentes.
+		
+		\item \textbf{\texttt{master}} — todas as \textit{threads} são alocadas no mesmo local onde a \textit{thread} principal (\textit{master/primary}) está executando.
+		
+		\item \textbf{\texttt{true}} — herda a política de afinidade da região paralela pai. Se não houver região pai, comporta-se de acordo com a política padrão definida pela implementação.
+		
+		\item \textbf{\texttt{false}} — não estabelece nenhuma política de afinidade específica; as \textit{threads} podem migrar livremente entre processadores durante a execução.
+	\end{itemize}
 	
+	\hspace{0.62cm}Reorganizamos o código de forma a possibilitar o teste de todas as políticas em uma única execução. Assim como realizado na Tarefa 12, o código foi executado com 1, 2, 4, 8, 16 e 32 \textit{threads}, para que ao final pudéssemos analisar se houve influência dessas políticas de afinidade na eficiência do código.
+	
+	O código foi executado no super computador da universidade utilizando o nó com o processador intel-128, cada teste foi executado 6 vezes para termos a certeza da constância dos resultados.
+	
+	\section{Resultados}
+
 	 
 
 \end{document}
