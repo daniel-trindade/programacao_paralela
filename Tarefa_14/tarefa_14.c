@@ -56,7 +56,7 @@ int main(int argc, char** argv) {
     
     // Verifica se temos exatamente 2 processos
     if (size != 2) {
-        if (rank == 0) {
+        if (rank == 1) {
             fprintf(stderr, "Erro: Este programa requer exatamente 2 processos MPI\n");
             fprintf(stderr, "Execute com: mpirun -np 2 %s\n", argv[0]);
         }

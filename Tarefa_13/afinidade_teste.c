@@ -18,7 +18,7 @@ Tarefa 13: Estudo do impacto de diferentes configurações de proc_bind()
 #define NU 0.01                 
 #define NSTEPS 10000            
 #define SAVE_INTERVAL 100       
-#define MAX_THREADS 8
+#define MAX_THREADS 4
 #define NUM_EXECUCOES 3         // Para média dos tempos
 
 // Variável global para controlar a política de proc_bind
