@@ -1,5 +1,13 @@
 /*
-Tarefa 13: Estudo do impacto de diferentes configurações de proc_bind()
+Avalie como a escalabilidade do seu código
+de Navier-Strokes muda ao utilizar os diversos
+tipos de afinidades de threads suportados
+pelo sistema operacional e pelo OpenMP no
+mesmo nó de computação do NPAD que utilizou
+para a tarefa 12
+
+Informações documentais:
+https://www.openmp.org/spec-html/5.0/openmpsu36.html#x56-900002.6.2
 */
 
 #include <stdio.h>

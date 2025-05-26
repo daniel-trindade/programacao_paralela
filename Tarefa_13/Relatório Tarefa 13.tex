@@ -5,6 +5,7 @@
 \usepackage[brazil]{babel}
 \usepackage{array}
 \usepackage{geometry}
+\usepackage{placeins}
 \geometry{a4paper, margin=2cm}
 
 
@@ -37,15 +38,15 @@
 	\hspace{0.62cm}Nesta tarefa, analisamos os impactos da cláusula \texttt{proc\_bind()} com as seguintes políticas de afinidade:
 	
 	\begin{itemize}
-		\item \textbf{\texttt{spread}} — distribui as \textit{threads} de forma espalhada pelos processadores, maximizando a distância entre elas. O objetivo é utilizar o máximo de recursos de hardware possível, como diferentes \textit{sockets}, nós NUMA ou núcleos físicos.
+		\item \textbf{\texttt{spread}} — O openMP distribui as \textit{threads} de forma espalhada pelos processadores, maximizando a distância entre elas. O objetivo é utilizar o máximo de recursos do hardware possível, como diferentes \textit{sockets} ou núcleos físicos. Aumenta a latência de comunicação entre as \textit{threads} em troca de menos disputa por recurso. Ideal quando temos programas com \textit{threads} independentes;
 		
-		\item \textbf{\texttt{close}} — agrupa as \textit{threads} próximas umas das outras, preferencialmente no mesmo \textit{socket}, nó NUMA ou núcleos adjacentes.
+		\item \textbf{\texttt{close}} — O openMP agrupa as \textit{threads} próximas umas das outras, preferencialmente no mesmo \textit{socket} ou núcleos adjacentes ao da \textit{thread} master. Utilizada quando queremos manter as \textit{threads} próximas pra diminuir a latência, mas não queremos sobrecarregar um mesmo núcleo;
 		
-		\item \textbf{\texttt{master}} — todas as \textit{threads} são alocadas no mesmo local onde a \textit{thread} principal (\textit{master/primary}) está executando.
+		\item \textbf{\texttt{master}} — Nessa política todas as \textit{threads} são alocadas no mesmo local onde a \textit{thread} principal (\textit{master/primary}) está executando. Utilizado quando a comunicação entre \textit{threads} é muito intensa e isso compença a perda de paralelismo. Pois ela gera disputa por recursos, mas reduz a latência de comunicação entre as \textit{threads};
 		
 		\item \textbf{\texttt{true}} — herda a política de afinidade da região paralela pai. Se não houver região pai, comporta-se de acordo com a política padrão definida pela implementação.
 		
-		\item \textbf{\texttt{false}} — não estabelece nenhuma política de afinidade específica; as \textit{threads} podem migrar livremente entre processadores durante a execução.
+		\item \textbf{\texttt{false}} — Desativa a afinidade de \textit{threads} o escalonador do sistema operacional é quem vai decidir onde cada \textit{thread} ficará. Com isso pode haver migração de \textit{threads} entre núcleos causando mais overhead e menos previsibilidade;
 	\end{itemize}
 	
 	\hspace{0.62cm}Reorganizamos o código de forma a possibilitar o teste de todas as políticas em uma única execução. Assim como realizado na Tarefa 12, o código foi executado com 1, 2, 4, 8, 16 e 32 \textit{threads}, para que ao final pudéssemos analisar se houve influência dessas políticas de afinidade na eficiência do código.
@@ -55,8 +56,8 @@
 	\section{Resultados}
 	Tendo em vista que a ideia é observar como as politicas de afinidade de \textit{thread} afetam a escalabilidade do nosso programa, faremos uma tabela de escalabilidade para cada politica o metodo para criação dessa tabela já foi visto anteriormente na tarefa 12.
 	
-	\subsection{Default}	
-	\begin{table}[h]
+	\subsection{Execução sem diretiva \texttt{PROC\_BIND()}}	
+	\begin{table}[htbp]
 		\centering
 		\begin{tabular}{|c|c|c|c|c|c|c|}
 			\hline
@@ -70,6 +71,8 @@
 		\end{tabular}
 		\caption{Tabela de escalabilidade da política default.}
 	\end{table}
+	
+	\FloatBarrier
 	
 	\subsection{Spread}
 	\begin{table}[htbp]
@@ -94,6 +97,10 @@
 		\caption{Tabela de escalabilidade da política Spread}
 	\end{table}
 	
+	\vspace{5cm}
+	
+	\FloatBarrier
+	
 	\subsection{Close}
 	\begin{table}[htbp]
 		\centering
@@ -117,7 +124,7 @@
 		\caption{Tabela de escalabilidade da política Close}
 	\end{table}
 	
-	\vspace{5cm}
+	\FloatBarrier
 	
 	\subsection{Master}
 	\begin{table}[htbp]
@@ -141,6 +148,11 @@
 		\end{tabular}
 		\caption{Tabela de escalabilidade da política Master}
 	\end{table}
+	
+	\FloatBarrier
+	
+	\section{Analise dos Resultados}
+	
 
 	
 	

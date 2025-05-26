@@ -1,0 +1,116 @@
+\documentclass[a4paper, 12pt]{article}
+\usepackage[top=1.8cm, bottom=1.8cm, left=1.5cm, right=1.5cm]{geometry}
+\usepackage{float}
+\usepackage[utf8]{inputenc}
+\usepackage[brazil]{babel}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.17} % ou a versão que você tiver
+
+
+
+\begin{document}
+	
+	\begin{center}
+		Universidade Federal do Rio Grande do Norte
+		
+		Departamento de Engenharia da Computação e Automação  
+		
+		DCA3703 - Programação Paralela  
+		
+		\textbf{Tarefa 14: Latência de comunicação usando MPI}  
+		
+		\textbf{Aluno:} Daniel Bruno Trindade da Silva  
+	\end{center}  
+	
+	\section{Introdução}
+	
+	\hspace{0.62cm}Este relatório tem como objetivo apresentar os conhecimentos adquiridos durante a realização da Tarefa 14 da disciplina de \textbf{Programação Paralela}. A atividade consistiu na implementação e análise de um sistema de troca de mensagens utilizando a biblioteca MPI (Message Passing Interface). O foco principal foi observar como o tempo de comunicação entre dois processos se comporta à medida que o tamanho das mensagens aumenta, destacando aspectos como latência e largura de banda.
+	
+	\section{Enunciado}
+	
+	\hspace{0.62cm}Implemente um programa MPI com exatamente dois processos. O processo 0 deve enviar uma mensagem ao processo 1, que imediatamente responde com a mesma mensagem. Meça o tempo total de execução de múltiplas trocas consecutivas dessa mensagem,utilizando \texttt{MPI\_Wtime}. Registre os tempos para diferentes tamanhos, desde mensagens pequenas (como 8 bytes) até mensagens maiores (como 1 MB ou mais). Analise o graficamente o tempo em função do tamanho da mensagem e identifique os regimes onde a latência domina e onde a largura de banda se torna o fator principal.
+	
+	\section{Desenvolvimento}
+	
+	\hspace{0.62cm}Conforme solicitado no enunciado, desenvolvemos um programa do tipo "\textit{ping-pong}", utilizando a biblioteca MPI. O programa cria exatamente dois processos que se comunicam entre si, realizando sucessivas trocas de mensagens.
+	
+	\hspace{0.62cm}A lógica da implementação foi estruturada da seguinte forma: o processo de rank 0 envia uma mensagem ao processo de rank 1, que imediatamente a recebe e devolve a mesma mensagem para o processo 0. Esse ciclo de envio e recebimento foi repetido diversas vezes para cada tamanho de mensagem, com o objetivo de obter uma medição mais precisa do tempo de execução.
+	
+	\hspace{0.62cm}Para mensurar o tempo total das trocas de mensagens, utilizamos a função \texttt{MPI\_Wtime}, que fornece uma medida de tempo de alta resolução adequada para benchmarking em aplicações paralelas. Antes de iniciar as medições, foi utilizada a função \texttt{MPI\_Barrier} para sincronizar os dois processos, garantindo que ambos estivessem prontos para iniciar a troca de mensagens ao mesmo tempo.
+	
+	\hspace{0.62cm}Foram testados diferentes tamanhos de mensagens: 8 bytes, 1 kilobyte (KB), 10 KB, 100 KB e 1 megabyte (MB). Cada configuração de tamanho foi submetida a um número fixo de repetições (1000 trocas consecutivas) para minimizar os efeitos de variações momentâneas de desempenho do sistema e tornar os resultados mais confiáveis.
+	
+	\hspace{0.62cm}Por fim, os dados obtidos permitiram identificar os regimes de comunicação: o regime onde a latência (tempo fixo por envio) domina, característico de mensagens pequenas, e o regime onde a largura de banda (capacidade máxima de transmissão de dados) passa a ser o principal fator, predominante em mensagens maiores.
+	
+	\section{Resultados}
+	
+	\begin{table}[H]
+		\centering
+		\begin{tabular}{|c|c|}
+			\hline
+			\textbf{Tamanho da Mensagem} & \textbf{Tempo total para 1000 trocas (s)} \\ \hline
+			8 bytes                     & 0.003100                                 \\ \hline
+			1 KB (1024 bytes)           & 0.006715                                 \\ \hline
+			10 KB (10240 bytes)         & 0.014761                                 \\ \hline
+			100 KB (102400 bytes)       & 0.079849                                 \\ \hline
+			1 MB (1048576 bytes)        & 0.680651                                 \\ \hline
+		\end{tabular}
+		\caption{Resultados do tempo total de comunicação para diferentes tamanhos de mensagem}
+		\label{tab:resultados}
+	\end{table}
+	
+	\begin{figure}[H]
+		\centering
+		\begin{tikzpicture}
+			\begin{axis}[
+				width=12cm, height=8cm,
+				xlabel={\textbf{Tamanho da Mensagem (bytes)}},
+				ylabel={\textbf{Tempo total (s)}},
+				xmode=log,
+				log basis x=10,
+				ymode=log,
+				log basis y=10,
+				grid=both,
+				grid style={line width=.1pt, draw=gray!10},
+				major grid style={line width=.2pt,draw=gray!50},
+				minor tick num=1,
+				mark size=2pt,
+				legend pos=north west
+				]
+				\addplot[
+				color=blue,
+				mark=*,
+				thick
+				] coordinates {
+					(8, 0.003100)
+					(1024, 0.006715)
+					(10240, 0.014761)
+					(102400, 0.079849)
+					(1048576, 0.680651)
+				};
+				\addlegendentry{Tempo de comunicação}
+			\end{axis}
+		\end{tikzpicture}
+		\caption{Tempo total de 1000 trocas em função do tamanho da mensagem}
+		\label{fig:tempo_vs_tamanho}
+	\end{figure}
+	
+	\section{Análise dos Resultados}
+	
+	\hspace{0.62cm}Os resultados obtidos demonstram claramente a existência de dois regimes distintos na comunicação entre processos MPI: o regime dominado pela latência e o regime dominado pela largura de banda.
+	
+	\hspace{0.62cm}Para tamanhos de mensagens muito pequenos, como 8 bytes e 1 KB, observou-se que o tempo total de execução das trocas variou muito pouco, evidenciando que o fator preponderante foi a \textbf{latência} da comunicação — ou seja, o tempo fixo necessário para iniciar cada envio e recebimento de mensagem, independentemente do volume de dados transmitido.
+	
+	\hspace{0.62cm}Por outro lado, à medida que o tamanho da mensagem aumentou para valores como 100 KB e 1 MB, o tempo total cresceu de forma acentuada. Isso indica que, para mensagens maiores, o fator predominante passa a ser a \textbf{largura de banda}, que corresponde à capacidade do sistema de transmitir grandes volumes de dados em determinado intervalo de tempo.
+	
+	\hspace{0.62cm}O comportamento observado é característico de sistemas de comunicação paralela e confirma as expectativas teóricas. No gráfico apresentado, é possível identificar uma região inicial quase constante (regime de latência dominante) e uma região de crescimento quase linear (regime de largura de banda dominante).
+	
+	\section{Conclusão}
+	
+	\hspace{0.62cm}A realização desta atividade permitiu compreender de forma prática como o tempo de comunicação entre processos em sistemas paralelos é influenciado tanto pela latência quanto pela largura de banda. A implementação do programa "ping-pong" utilizando a biblioteca MPI proporcionou a observação direta desses dois regimes, evidenciando como, para mensagens pequenas, a latência é o fator determinante, enquanto para mensagens maiores, a largura de banda se torna o elemento preponderante.
+	
+	\hspace{0.62cm}Além disso, a análise dos resultados demonstrou a importância de considerar o tamanho das mensagens na otimização do desempenho de aplicações paralelas, uma vez que diferentes tamanhos podem impactar significativamente o tempo total de comunicação. A utilização de técnicas de medição precisas, como o uso da função \texttt{MPI\_Wtime} e a sincronização com \texttt{MPI\_Barrier}, também se mostrou essencial para garantir a confiabilidade dos resultados.
+	
+	\hspace{0.62cm}Por fim, a atividade contribuiu para consolidar os conhecimentos sobre comunicação paralela com MPI, bem como sobre a importância da análise empírica no entendimento do comportamento de sistemas distribuídos.
+	
+\end{document}
