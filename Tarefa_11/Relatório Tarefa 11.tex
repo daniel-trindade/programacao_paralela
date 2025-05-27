@@ -20,12 +20,9 @@
 	\section{Introdução}  
 	\hspace{.62cm}Este relatório tem como objetivo apresentar o conhecimento adquirido durante a realização da Tarefa 11 da disciplina de \textbf{Computação Paralela}. A atividade consistiu em um estudo voltado à fixação dos conceitos relacionados às cláusulas \texttt{schedule} e \texttt{collapse}, bem como à análise de seus impactos em códigos paralelizados utilizando a biblioteca \textbf{OpenMP}.  
 	
-	\section{Enunciado}  
-	\hspace{.62cm}A tarefa traz como proposta a implementação de um código que simule a equação de Navier-Stokes e, após sua validação, o desenvolvimento de uma versão paralelizada do código. Seu enunciado pode ser encontrado a seguir:  
+	\section{Enunciado}   
 	
-	\begin{quote}  
-		Escreva um código que simule o movimento de um fluido ao longo do tempo usando a equação de Navier-Stokes, considerando apenas os efeitos da viscosidade. Desconsidere a pressão e quaisquer forças externas. Utilize diferenças finitas para discretizar o espaço e simule a evolução da velocidade do fluido no tempo. Inicialize o fluido parado ou com velocidade constante e verifique se o campo permanece estável. Em seguida, crie uma pequena perturbação e observe se ela se difunde suavemente. Após validar o código, paralelize-o com OpenMP e explore o impacto das cláusulas schedule e collapse no desempenho da execução paralela.  
-	\end{quote}  
+	\hspace{.62cm}Escreva um código que simule o movimento de um fluido ao longo do tempo usando a equação de Navier-Stokes, considerando apenas os efeitos da viscosidade. Desconsidere a pressão e quaisquer forças externas. Utilize diferenças finitas para discretizar o espaço e simule a evolução da velocidade do fluido no tempo. Inicialize o fluido parado ou com velocidade constante e verifique se o campo permanece estável. Em seguida, crie uma pequena perturbação e observe se ela se difunde suavemente. Após validar o código, paralelize-o com OpenMP e explore o impacto das cláusulas schedule e collapse no desempenho da execução paralela.  
 	
 	\section{Desenvolvimento}  
 	\hspace{.62cm}Como solicitado no enunciado, foi criado um código para a implementação da simulação da velocidade do fluido. O fluido foi representado como uma matriz tridimensional de velocidades, discretizada em uma malha de dimensões \( NX \times NY \times NZ = 20 \times 20 \times 20 \), com espaçamento \( \Delta x = \Delta y = \Delta z = 0.01 \). A equação de Navier-Stokes foi simplificada, considerando apenas o termo de viscosidade:  
@@ -38,13 +35,68 @@
 	\subsection{Implementação do Código}  
 	A discretização utilizou o método de diferenças finitas:  
 	\begin{itemize}  
-		\item \textbf{Condições Iniciais}: O campo de velocidade foi inicializado com valores nulos, exceto no centro do domínio, onde uma perturbação de magnitude 1 foi inserida.  
-		\item \textbf{Condições de Contorno}: Velocidade fixa (\( u = 0 \)) em todas as bordas do domínio.  
-		\item \textbf{Atualização Temporal}: O Laplaciano foi calculado para cada ponto interno da malha, utilizando diferenças centradas. O passo de tempo (\( \Delta t = 10^{-5} \)) garantiu estabilidade numérica.  
+		\item \textbf{Condições Iniciais}: O campo de velocidade foi inicializado com valores nulos, exceto no centro do domínio, onde uma perturbação de magnitude 1 foi inserida.
+		
+		\begin{verbatim}
+			void initialize(double u[NX][NY][NZ]) {
+				for (int i = 0; i < NX; i++) {
+					for (int j = 0; j < NY; j++) {
+						for (int k = 0; k < NZ; k++) {
+							u[i][j][k] = 0.0;
+						}
+					}
+				}
+				int cx = NX / 2;
+				int cy = NY / 2;
+				int cz = NZ / 2;
+				u[cx][cy][cz] = 1.0;
+			}
+		\end{verbatim}
+		  
+		\item \textbf{Condições de Contorno}: Velocidade fixa (\( u = 0 \)) em todas as bordas do domínio.
+		
+		\begin{verbatim}
+			void apply_boundary_conditions(double u[NX][NY][NZ]) {
+				for (int i = 0; i < NX; i++) {
+					for (int j = 0; j < NY; j++) {
+						u[i][j][0] = 0.0;
+						u[i][j][NZ-1] = 0.0;
+					}
+					for (int k = 0; k < NZ; k++) {
+						u[i][0][k] = 0.0;
+						u[i][NY-1][k] = 0.0;
+					}
+				}
+				for (int j = 0; j < NY; j++) {
+					for (int k = 0; k < NZ; k++) {
+						u[0][j][k] = 0.0;
+						u[NX-1][j][k] = 0.0;
+					}
+				}
+			}
+		\end{verbatim}
+		
+		\item \textbf{Atualização Temporal}: O Laplaciano foi calculado para cada ponto interno da malha, utilizando diferenças centradas. O passo de tempo (\( \Delta t = 10^{-5} \)) garantiu estabilidade numérica. 
+		
+		\begin{verbatim}
+			void update(double u[NX][NY][NZ], double u_new[NX][NY][NZ]) {
+				for (int i = 1; i < NX-1; i++) {
+					for (int j = 1; j < NY-1; j++) {
+						for (int k = 1; k < NZ-1; k++) {
+							double dudx2 = (u[i+1][j][k] - 2*u[i][j][k] + u[i-1][j][k]) / (DX*DX);
+							double dudy2 = (u[i][j+1][k] - 2*u[i][j][k] + u[i][j-1][k]) / (DY*DY);
+							double dudz2 = (u[i][j][k+1] - 2*u[i][j][k] + u[i][j][k-1]) / (DZ*DZ);
+							u_new[i][j][k] = u[i][j][k] + NU * DT * (dudx2 + dudy2 + dudz2);
+						}
+					}
+				}
+			}
+		\end{verbatim}
+		 
 	\end{itemize}  
 	
 	\subsection{Validação}  
-	Inicialmente, verificou-se a estabilidade do campo sem perturbações. Posteriormente, a introdução da perturbação no centro resultou em uma difusão suave, conforme esperado para um fluido viscoso. A evolução da velocidade no centro (\( u_{\text{centro}} \)) foi monitorada a cada 50 passos, exibindo um decaimento gradual.  
+		\hspace{.62cm}Inicialmente, verificou-se a estabilidade do campo sem perturbações. Posteriormente, a introdução da perturbação no centro resultou em uma difusão suave, conforme esperado para um fluido viscoso. A evolução da velocidade no centro (\( u_{\text{centro}} \)) foi monitorada a cada 50 passos, exibindo um decaimento gradual.  
 	
 	\begin{figure}[h]
 		\centering
@@ -61,7 +113,7 @@
 	\end{itemize}  
 	
 	\subsection{Análise de Desempenho}  
-	Para comparar o desempenho da aplicação das configurações da cláusula \texttt{schedule}, variamos os parâmetros (\texttt{static}, \texttt{dynamic}, \texttt{guided} e \texttt{auto}) e o número de threads (1, 2, 4 e 8) em nossos testes e estes são os resultados obtidos:
+		\hspace{.62cm}Para comparar o desempenho da aplicação das configurações da cláusula \texttt{schedule}, variamos os parâmetros (\texttt{static}, \texttt{dynamic}, \texttt{guided} e \texttt{auto}) e o número de threads (1, 2, 4 e 8) em nossos testes e estes são os resultados obtidos:
 	
 	\begin{table}[htbp]
 		\centering

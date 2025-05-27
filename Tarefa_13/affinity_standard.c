@@ -20,7 +20,7 @@
 // Inicializa todos os valores do campo como zero
 // e coloca uma perturbação no centro do domínio
 void initialize(double u[NX][NY][NZ]) {
-    #pragma omp parallel for proc_bind(master) collapse(3)
+    #pragma omp parallel for collapse(3)
     for (int i = 0; i < NX; i++) {
         for (int j = 0; j < NY; j++) {
             for (int k = 0; k < NZ; k++) {
@@ -38,7 +38,7 @@ void initialize(double u[NX][NY][NZ]) {
 // Fecha as bordas do domínio com velocidade zero
 void apply_boundary_conditions(double u[NX][NY][NZ]) {
     // Paralelização das faces XY (planos Z=0 e Z=NZ-1)
-    #pragma omp parallel for proc_bind(master) collapse(2) schedule(static)
+    #pragma omp parallel for collapse(2) schedule(static)
     for (int i = 0; i < NX; i++) {
         for (int j = 0; j < NY; j++) {
             u[i][j][0] = 0.0;
@@ -47,7 +47,7 @@ void apply_boundary_conditions(double u[NX][NY][NZ]) {
     }
     
     // Paralelização das faces XZ (planos Y=0 e Y=NY-1)
-    #pragma omp parallel for proc_bind(master) collapse(2) schedule(static)
+    #pragma omp parallel for collapse(2) schedule(static)
     for (int i = 0; i < NX; i++) {
         for (int k = 0; k < NZ; k++) {
             u[i][0][k] = 0.0;
@@ -56,7 +56,7 @@ void apply_boundary_conditions(double u[NX][NY][NZ]) {
     }
     
     // Paralelização das faces YZ (planos X=0 e X=NX-1)
-    #pragma omp parallel for proc_bind(master) collapse(2) schedule(static)
+    #pragma omp parallel for collapse(2) schedule(static)
     for (int j = 0; j < NY; j++) {
         for (int k = 0; k < NZ; k++) {
             u[0][j][k] = 0.0;
@@ -67,7 +67,7 @@ void apply_boundary_conditions(double u[NX][NY][NZ]) {
 
 // Atualização do campo - versão paralelizada
 void update(double u[NX][NY][NZ], double u_new[NX][NY][NZ]) {
-    #pragma omp parallel for proc_bind(master) collapse(3) schedule(static)
+    #pragma omp parallel for collapse(3) schedule(static)
     for (int i = 1; i < NX-1; i++) {
         for (int j = 1; j < NY-1; j++) {
             for (int k = 1; k < NZ-1; k++) {

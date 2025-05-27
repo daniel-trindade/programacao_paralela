@@ -46,7 +46,7 @@
 	 Dessa forma, é possível avaliar o comportamento do programa em termos de escalabilidade forte, identificando possíveis gargalos e analisando o ganho de desempenho à medida que mais threads são utilizadas.
 	 
 	 \section{Resultados}
-	 \subsection{Escalabilidade Forte}	 
+	 \subsection{Escalabilidade Forte (matriz 20x20x20)}	 
 	 	\begin{table}[H]
 	 	\centering
 	 	\begin{tabular}{|c|c|c|c|c|c|c|}
@@ -91,7 +91,7 @@
 	 	\caption{Gráfico de Speedup conforme o número de threads.}
 	 \end{figure}
 	 
-	 \subsection{Escalabilidade Fraca}
+	 \subsection{Escalabilidade Fraca (Execuções com 8 \textit{threads})}
 	 
 	 \begin{table}[H]
 	 	\centering
@@ -160,13 +160,13 @@
 	 
 	 \hspace{0.68cm}Através dos resultados obtidos, foi possível perceber que o programa em análise apresenta uma boa \textbf{Escalabilidade Forte} até a utilização de 16 \textit{threads}. A partir da execução com 32 \textit{threads}, observa-se uma degradação, com uma perda significativa de \textit{speedup} e eficiência. Esse comportamento pode ser claramente visualizado na Figura 1.
 	 
-	 \hspace{0.68cm}Com relação à \textbf{Escalabilidade Fraca}, foi possível observar que a eficiência tende a aumentar, enquanto o tempo de execução cresce de forma aproximadamente linear com o aumento do tamanho do problema. Esse comportamento indica que o programa é capaz de escalar bem conforme o problema cresce, ou seja, possui uma boa escalabilidade fraca.
+	 Com relação à \textbf{Escalabilidade Fraca}, foi possível observar que a eficiência tende a aumentar, enquanto o tempo de execução cresce de forma aproximadamente linear com o aumento do tamanho do problema. Esse comportamento indica que o programa é capaz de escalar bem conforme o problema cresce, ou seja, possui uma boa escalabilidade fraca.
 	 
 	 \section{Conclusão}
 	 
 	 \hspace{0.68cm}A partir dos testes realizados, foi possível concluir que a versão paralelizada do programa apresentou um bom desempenho em termos de escalabilidade. Na análise de \textbf{Escalabilidade Forte}, observou-se ganhos significativos de \textit{speedup} e eficiência até a utilização de 16 \textit{threads}, com uma posterior degradação ao se utilizar 32 \textit{threads}, possivelmente devido à sobrecarga de gerenciamento das \textit{threads} e limitações de hardware.
 	 
-	 \hspace{0.68cm}Já na análise de \textbf{Escalabilidade Fraca}, o programa demonstrou ser capaz de lidar eficientemente com o aumento do tamanho do problema, mantendo ou melhorando a eficiência conforme a carga computacional cresce. Assim, conclui-se que o programa possui uma boa capacidade de escalabilidade, tanto em cenários de aumento de recursos quanto de expansão do problema, validando a eficácia da paralelização implementada com OpenMP.
+	 Já na análise de \textbf{Escalabilidade Fraca}, o programa demonstrou ser capaz de lidar eficientemente com o aumento do tamanho do problema, mantendo ou melhorando a eficiência conforme a carga computacional cresce. Assim, conclui-se que o programa possui uma boa capacidade de escalabilidade, tanto em cenários de aumento de recursos quanto de expansão do problema, validando a eficácia da paralelização implementada com OpenMP.
 	 
 	 
 	 

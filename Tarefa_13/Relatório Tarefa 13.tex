@@ -52,157 +52,130 @@
 	\section{Resultados}
 	Tendo em vista que a ideia é observar como as politicas de afinidade de \textit{thread} afetam a escalabilidade do nosso programa, faremos uma tabela de escalabilidade para cada politica o metodo para criação dessa tabela já foi visto anteriormente na tarefa 12.
 	
-	\subsection{Execução sem diretiva \texttt{PROC\_BIND()}}	
-	\begin{table}[htbp]
-		\centering
-		\begin{tabular}{|c|c|c|c|c|c|c|}
-			\hline
-			\textbf{\# cores }& \textbf{20x20x20} & \textbf{20x20x40} & \textbf{20x20x80} & \textbf{20x20x160} & \textbf{20x20x320} & \textbf{20x20x640} \\ \hline
-			1        & 1.00     & 1.00     & 1.00     & 1.00      & 1.00      & 1.00      \\ \hline
-			2        & 0.84     & 0.86     & 0.90     & 0.91      & 0.92      & 0.96      \\ \hline
-			4        & 0.67     & 0.71     & 0.76     & 0.78      & 0.81      & 0.83      \\ \hline
-			8        & 0.45     & 0.51     & 0.56     & 0.59      & 0.66      & 0.65      \\ \hline
-			16       & 0.25     & 0.32     & 0.39     & 0.44      & 0.35      & 0.50      \\ \hline
-			32       & 0.11     & 0.15     & 0.19     & 0.22      & 0.25      & 0.27      \\ \hline
-		\end{tabular}
-		\caption{Tabela de escalabilidade da política default.}
-	\end{table}
-	
-	\FloatBarrier
 	
 	\subsection{Spread}
-	\begin{table}[htbp]
+	\begin{table}[h!]
 		\centering
 		\begin{tabular}{|c|c|c|c|c|c|c|}
 			\hline
-			\textbf{\# cores} & \textbf{20x20x20} & \textbf{20x20x40} & \textbf{20x20x80} & \textbf{20x20x160} & \textbf{20x20x320} & \textbf{20x20x640} \\
-			\hline
-			\textbf{1} & 1,00 & 1,00 & 1,00 & 1,00 & 1,00 & 1,00 \\
-			\hline
-			\textbf{2} & 0,85 & 0,87 & 0,90 & 0,91 & 0,93 & 0,96 \\
-			\hline
-			\textbf{4} & 0,67 & 0,72 & 0,76 & 0,78 & 0,80 & 0,83 \\
-			\hline
-			\textbf{8} & 0,46 & 0,52 & 0,57 & 0,59 & 0,66 & 0,65 \\
-			\hline
-			\textbf{16} & 0,26 & 0,33 & 0,39 & 0,44 & 0,49 & 0,50 \\
-			\hline
-			\textbf{32} & 0,11 & 0,16 & 0,19 & 0,22 & 0,25 & 0,27 \\
-			\hline
+			\textbf{\# cores} & \textbf{20x20x20} & \textbf{20x20x40} & \textbf{20x20x80} & \textbf{20x20x160} & \textbf{20x20x320} & \textbf{20x20x640} \\ \hline
+			1                 & 1.00              & 1.00              & 1.00              & 1.00               & 1.00               & 1.00               \\ \hline
+			2                 & 0.45              & 0.46              & 0.48              & 0.49               & 0.50               & 0.50               \\ \hline
+			4                 & 0.19              & 0.22              & 0.23              & 0.24               & 0.21               & 0.25               \\ \hline
+			8                 & 0.07              & 0.09              & 0.11              & 0.11               & 0.11               & 0.12               \\ \hline
+			16                & 0.02              & 0.04              & 0.05              & 0.05               & 0.06               & 0.06               \\ \hline
+			32                & 0.01              & 0.01              & 0.02              & 0.02               & 0.03               & 0.03               \\ \hline
 		\end{tabular}
-		\caption{Tabela de escalabilidade da política Spread}
+		\caption{Tabela de Escalabilidade para Política Spread}
+		\label{tab:Tabela de Escalabilidade para Política Spread} % Label alterado para unicidade
 	\end{table}
 	
 	\FloatBarrier
 	
 	\subsection{Close}
-	\begin{table}[htbp]
+	\begin{table}[h!]
 		\centering
 		\begin{tabular}{|c|c|c|c|c|c|c|}
 			\hline
-			\textbf{\# cores} & \textbf{20x20x20} & \textbf{20x20x40} & \textbf{20x20x80} & \textbf{20x20x160} & \textbf{20x20x320} & \textbf{20x20x640} \\
-			\hline
-			\textbf{1} & 1,00 & 1,00 & 1,00 & 1,00 & 1,00 & 1,00 \\
-			\hline
-			\textbf{2} & 0,85 & 0,87 & 0,90 & 0,91 & 0,93 & 0,96 \\
-			\hline
-			\textbf{4} & 0,67 & 0,72 & 0,76 & 0,78 & 0,81 & 0,83 \\
-			\hline
-			\textbf{8} & 0,45 & 0,52 & 0,57 & 0,59 & 0,66 & 0,65 \\
-			\hline
-			\textbf{16} & 0,25 & 0,33 & 0,39 & 0,44 & 0,35 & 0,50 \\
-			\hline
-			\textbf{32} & 0,11 & 0,16 & 0,19 & 0,22 & 0,26 & 0,27 \\
-			\hline
+			\textbf{\# cores} & \textbf{20x20x20} & \textbf{20x20x40} & \textbf{20x20x80} & \textbf{20x20x160} & \textbf{20x20x320} & \textbf{20x20x640} \\ \hline
+			1                 & 1.00              & 1.00              & 1.00              & 1.00               & 1.00               & 1.00               \\ \hline
+			2                 & 0.44              & 0.47              & 0.47              & 0.49               & 0.51               & 0.50               \\ \hline
+			4                 & 0.19              & 0.22              & 0.23              & 0.24               & 0.25               & 0.25               \\ \hline
+			8                 & 0.07              & 0.09              & 0.10              & 0.11               & 0.12               & 0.12               \\ \hline
+			16                & 0.02              & 0.04              & 0.04              & 0.05               & 0.06               & 0.06               \\ \hline
+			32                & 0.01              & 0.01              & 0.02              & 0.02               & 0.03               & 0.03               \\ \hline
 		\end{tabular}
-		\caption{Tabela de escalabilidade da política Close}
+		\caption{Tabela de Escalabilidade para Política Close}
+		\label{tab:Tabela de Escalabilidade para Política Close}
+	\end{table}
+
+	
+	\FloatBarrier
+	
+	\subsection{Master}
+	\begin{table}[h!]
+		\centering
+		\begin{tabular}{|c|c|c|c|c|c|c|}
+			\hline
+			\textbf{\# cores} & \textbf{20x20x20} & \textbf{20x20x40} & \textbf{20x20x80} & \textbf{20x20x160} & \textbf{20x20x320} & \textbf{20x20x640} \\ \hline
+			1                 & 1.00              & 1.00              & 1.00              & 1.00               & 1.00               & 1.00               \\ \hline
+			2                 & 0.01              & 0.01              & 0.03              & 0.06               & 0.11               & 0.12               \\ \hline
+			4                 & 0.00              & 0.00              & 0.01              & 0.01               & 0.02               & 0.04               \\ \hline
+			8                 & 0.07              & 0.09              & 0.11              & 0.11               & 0.11               & 0.12               \\ \hline
+			16                & 0.02              & 0.04              & 0.05              & 0.05               & 0.06               & 0.06               \\ \hline
+			32                & 0.01              & 0.01              & 0.02              & 0.02               & 0.03               & 0.03               \\ \hline
+		\end{tabular}
+		\caption{Tabela de Escalabilidade para Política Master}
+		\label{tab:Tabela de Escalabilidade para Política Master} % Alterado para um novo label
 	\end{table}
 	
 	\vspace{5cm}
 	
 	\FloatBarrier
 	
-	\subsection{Master}
-	\begin{table}[htbp]
-		\centering
-		\begin{tabular}{|c|c|c|c|c|c|c|}
-			\hline
-			\textbf{\# cores} & \textbf{20x20x20} & \textbf{20x20x40} & \textbf{20x20x80} & \textbf{20x20x160} & \textbf{20x20x320} & \textbf{20x20x640} \\
-			\hline
-			\textbf{1} & 1,00 & 1,00 & 1,00 & 1,00 & 1,00 & 1,00 \\
-			\hline
-			\textbf{2} & 0,85 & 0,87 & 0,90 & 0,91 & 0,93 & 0,96 \\
-			\hline
-			\textbf{4} & 0,67 & 0,72 & 0,76 & 0,78 & 0,80 & 0,83 \\
-			\hline
-			\textbf{8} & 0,45 & 0,52 & 0,57 & 0,59 & 0,65 & 0,65 \\
-			\hline
-			\textbf{16} & 0,25 & 0,33 & 0,39 & 0,44 & 0,35 & 0,50 \\
-			\hline
-			\textbf{32} & 0,11 & 0,15 & 0,19 & 0,22 & 0,26 & 0,27 \\
-			\hline
-		\end{tabular}
-		\caption{Tabela de escalabilidade da política Master}
-	\end{table}
-	
-	\FloatBarrier
-	
 	\subsection{False}
-	\begin{table}[h]
+	\begin{table}[h!]
 		\centering
-		
 		\begin{tabular}{|c|c|c|c|c|c|c|}
 			\hline
-			\textbf{\# cores} & \textbf{20x20x20} & \textbf{20x20x40} & \textbf{20x20x80} & \textbf{20x20x160} & \textbf{20x20x320} & \textbf{20x20x640} \\
-			\hline
-			1 & 1.00 & 1.00 & 1.00 & 1.00 & 1.00 & 1.00 \\
-			\hline
-			2 & 0.85 & 0.88 & 0.90 & 0.91 & 0.93 & 0.92 \\
-			\hline
-			4 & 0.46 & 0.48 & 0.49 & 0.49 & 0.52 & 0.53 \\
-			\hline
-			8 & 0.11 & 0.15 & 0.18 & 0.20 & 0.22 & 0.23 \\
-			\hline
-			16 & 0.04 & 0.05 & 0.08 & 0.09 & 0.11 & 0.12 \\
-			\hline
-			32 & 0.01 & 0.02 & 0.03 & 0.04 & 0.05 & 0.05 \\
-			\hline
+			\textbf{\# cores} & \textbf{20x20x20} & \textbf{20x20x40} & \textbf{20x20x80} & \textbf{20x20x160} & \textbf{20x20x320} & \textbf{20x20x640} \\ \hline
+			1                 & 1.00              & 1.00              & 1.00              & 1.00               & 1.00               & 1.00               \\ \hline
+			2                 & 0.83              & 0.86              & 0.91              & 0.91               & 0.90               & 0.96               \\ \hline
+			4                 & 0.45              & 0.48              & 0.49              & 0.49               & 0.50               & 0.56               \\ \hline
+			8                 & 0.10              & 0.14              & 0.17              & 0.19               & 0.21               & 0.24               \\ \hline
+			16                & 0.05              & 0.07              & 0.08              & 0.09               & 0.10               & 0.12               \\ \hline
+			32                & 0.03              & 0.04              & 0.04              & 0.05               & 0.05               & 0.06               \\ \hline
 		\end{tabular}
-		\caption{Tabela de Escalabilidade da politica False}
+		\caption{Tabela de Escalabilidade para Política False}
+		\label{tab:Tabela de Escalabilidade para Política False} % Label alterado para unicidade
 	\end{table}
 	
 	
 	\FloatBarrier
 	
 	\subsection{True}
-	\begin{table}[h]
+	\begin{table}[h!]
 		\centering
 		\begin{tabular}{|c|c|c|c|c|c|c|}
 			\hline
-			\textbf{\# cores} & \textbf{20x20x20} & \textbf{20x20x40} & \textbf{20x20x80} & \textbf{20x20x160} & \textbf{20x20x320} & \textbf{20x20x640} \\
-			\hline
-			1 & 1.00 & 1.00 & 1.00 & 1.00 & 1.00 & 1.00 \\
-			\hline
-			2 & 0.45 & 0.48 & 0.48 & 0.49 & 0.50 & 0.47 \\
-			\hline
-			4 & 0.19 & 0.23 & 0.23 & 0.24 & 0.25 & 0.23 \\
-			\hline
-			8 & 0.07 & 0.10 & 0.11 & 0.11 & 0.12 & 0.11 \\
-			\hline
-			16 & 0.02 & 0.04 & 0.05 & 0.05 & 0.06 & 0.06 \\
-			\hline
-			32 & 0.01 & 0.01 & 0.02 & 0.02 & 0.03 & 0.03 \\
-			\hline
+			\textbf{\# cores} & \textbf{20x20x20} & \textbf{20x20x40} & \textbf{20x20x80} & \textbf{20x20x160} & \textbf{20x20x320} & \textbf{20x20x640} \\ \hline
+			1                 & 1.00              & 1.00              & 1.00              & 1.00               & 1.00               & 1.00               \\ \hline
+			2                 & 0.44              & 0.47              & 0.48              & 0.49               & 0.49               & 0.50               \\ \hline
+			4                 & 0.19              & 0.22              & 0.23              & 0.24               & 0.25               & 0.25               \\ \hline
+			8                 & 0.07              & 0.09              & 0.11              & 0.11               & 0.12               & 0.12               \\ \hline
+			16                & 0.02              & 0.04              & 0.05              & 0.05               & 0.06               & 0.06               \\ \hline
+			32                & 0.01              & 0.01              & 0.02              & 0.02               & 0.02               & 0.03               \\ \hline
 		\end{tabular}
-		\caption{Tabela de Escalabilidade politica True}
-	\end{table}
+		\caption{Insira a legenda da sua tabela aqui}
+		\label{tab:minha_tabela}
+	\end{table}	
 	
-		\FloatBarrier
-	
+	\FloatBarrier
+		
 	\section{Analise dos Resultados}
 	
-
+	As politicas de afinidade de \textit{thread} foram testadas na sequencia em que as tabelas foram montadas. Essas tabelas mostram o comportamento da escalabilidade relacionando o tamanho do problema com a quantidade de \textit{thread} que a executaram, medindo através da sua eficiência.
 	
+	\subsection{Spread, True e Close}
+	Essas três políticas apresentaram comportamentos muito similares, caracterizados por eficiências bastante baixas em praticamente todas as configurações. A eficiência caiu rapidamente com o aumento do número de threads, atingindo valores próximos a zero com 16 e 32 threads. O aumento do tamanho do problema trouxe pouca ou nenhuma melhora significativa na eficiência, indicando baixa escalabilidade fraca.
+	
+	\subsection{Master}
+	A política MASTER apresentou a pior eficiência dentre todas as políticas avaliadas. Com 2 e 4 threads, as eficiências foram próximas de zero. Apenas a partir de 8 threads observou-se alguma melhora, embora ainda em níveis muito baixos (em torno de 0,11 a 0,12). A ampliação do tamanho do problema não resultou em ganhos expressivos.
+	
+	Esse resultado era totalmente esperado, uma vez que essa política centraliza a execução na thread principal, criando um gargalo que impede a distribuição eficiente da carga de trabalho. Assim, a política MASTER é reconhecidamente inadequada para programas paralelos que visam alta escalabilidade, conforme foi comprovado experimentalmente
+	
+	\subsection{False}
+	Esta política apresentou as melhores eficiências gerais em todas as configurações, especialmente com 2 e 4 threads, onde atingiu valores próximos a 0,9, indicando bom aproveitamento do paralelismo. Apesar de a eficiência cair progressivamente com o aumento do número de threads, ela se manteve superior às demais políticas. O aumento do tamanho do problema resultou em melhoras discretas na eficiência, evidenciando um comportamento típico de escalabilidade fraca.
+	
+	Era esperado que a ausência de afinidade permitisse ao sistema operacional otimizar a distribuição das threads, minimizando contenções e promovendo melhor balanceamento de carga. De fato, isso foi confirmado pelos resultados. O desempenho atendeu às expectativas.
+	
+	\section{Conclusão}
+
+	A análise realizada demonstrou que as políticas de afinidade de threads exercem um impacto significativo na eficiência e escalabilidade de programas paralelos. Os experimentos confirmaram que a escolha inadequada da política pode comprometer substancialmente o desempenho da aplicação.
+	
+	De forma geral, os resultados obtidos foram coerentes com a literatura e com o comportamento esperado para cada política, destacando a necessidade de uma análise criteriosa do perfil computacional de cada aplicação antes de definir a política de afinidade de threads. A escalabilidade forte se mostrou limitada em todas as políticas quando o número de threads foi elevado excessivamente, enquanto a escalabilidade fraca apresentou melhoras modestas, especialmente na política FALSE.
+	
+	Por fim, esta avaliação reforça a importância de realizar experimentos empíricos para orientar decisões de configuração em sistemas paralelos, visando sempre o melhor aproveitamento dos recursos computacionais disponíveis.
 	
 	
 

@@ -38,9 +38,71 @@
 	
 	\hspace{0.62cm}Para mensurar o tempo total das trocas de mensagens, utilizamos a função \texttt{MPI\_Wtime}, que fornece uma medida de tempo de alta resolução adequada para benchmarking em aplicações paralelas. Antes de iniciar as medições, foi utilizada a função \texttt{MPI\_Barrier} para sincronizar os dois processos, garantindo que ambos estivessem prontos para iniciar a troca de mensagens ao mesmo tempo.
 	
-	\hspace{0.62cm}Foram testados diferentes tamanhos de mensagens: 8 bytes, 1 kilobyte (KB), 10 KB, 100 KB e 1 megabyte (MB). Cada configuração de tamanho foi submetida a um número fixo de repetições (1000 trocas consecutivas) para minimizar os efeitos de variações momentâneas de desempenho do sistema e tornar os resultados mais confiáveis.
+	\subsection{Código}
+	\begin{verbatim}
+		#include <mpi.h>
+		#include <stdio.h>
+		#include <stdlib.h>
+		#include <string.h>
+		
+		#define NUM_REPETICOES 1000  // Número de trocas para cada tamanho
+		
+		int main(int argc, char** argv) {
+			int rank, size;
+			MPI_Init(&argc, &argv);
+			MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+			MPI_Comm_size(MPI_COMM_WORLD, &size);
+			
+			if (size != 2) {
+				if (rank == 0) {
+					printf("Este programa requer exatamente 2 processos.\n");
+				}
+				MPI_Finalize();
+				return 0;
+			}
+			
+			// Tamanhos de mensagens a serem testadas (em bytes)
+			int tamanhos[] = {8, 1024, 10*1024, 100*1024, 1024*1024};
+			int num_tamanhos = sizeof(tamanhos) / sizeof(tamanhos[0]);
+			
+			for (int t = 0; t < num_tamanhos; t++) {
+				int tamanho_msg = tamanhos[t];
+				char* buffer = (char*)malloc(tamanho_msg);
+				memset(buffer, 'A', tamanho_msg);
+				
+				MPI_Barrier(MPI_COMM_WORLD);  // Sincroniza antes de medir o tempo
+				double start_time = MPI_Wtime();
+				
+				for (int i = 0; i < NUM_REPETICOES; i++) {
+					if (rank == 0) {
+						MPI_Send(buffer, tamanho_msg, MPI_CHAR, 1, 0, MPI_COMM_WORLD);
+						MPI_Recv(buffer, tamanho_msg, MPI_CHAR, 1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+					} else if (rank == 1) {
+						MPI_Recv(buffer, tamanho_msg, MPI_CHAR, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+						MPI_Send(buffer, tamanho_msg, MPI_CHAR, 0, 0, MPI_COMM_WORLD);
+					}
+				}
+				
+				double end_time = MPI_Wtime();
+				
+				if (rank == 0) {
+					double total_time = end_time - start_time;
+					printf("Tamanho da mensagem: %d bytes, Tempo total para %d trocas: %f segundos\n",
+					tamanho_msg, NUM_REPETICOES, total_time);
+				}
+				
+				free(buffer);
+			}
+			
+			MPI_Finalize();
+			return 0;
+		}
+		
+	\end{verbatim}
 	
-	\hspace{0.62cm}Por fim, os dados obtidos permitiram identificar os regimes de comunicação: o regime onde a latência (tempo fixo por envio) domina, característico de mensagens pequenas, e o regime onde a largura de banda (capacidade máxima de transmissão de dados) passa a ser o principal fator, predominante em mensagens maiores.
+
+	
+	
 	
 	\section{Resultados}
 	
@@ -97,20 +159,22 @@
 	
 	\section{Análise dos Resultados}
 	
-	\hspace{0.62cm}Os resultados obtidos demonstram claramente a existência de dois regimes distintos na comunicação entre processos MPI: o regime dominado pela latência e o regime dominado pela largura de banda.
+	\hspace{0.62cm}Foram testados diferentes tamanhos de mensagens: 8 bytes, 1 kilobyte (KB), 10 KB, 100 KB e 1 megabyte (MB). Cada configuração de tamanho foi submetida a um número fixo de repetições (1000 trocas consecutivas) para minimizar os efeitos de variações momentâneas de desempenho do sistema e tornar os resultados mais confiáveis.
 	
-	\hspace{0.62cm}Para tamanhos de mensagens muito pequenos, como 8 bytes e 1 KB, observou-se que o tempo total de execução das trocas variou muito pouco, evidenciando que o fator preponderante foi a \textbf{latência} da comunicação — ou seja, o tempo fixo necessário para iniciar cada envio e recebimento de mensagem, independentemente do volume de dados transmitido.
+	Os resultados obtidos demonstram claramente a existência de dois regimes distintos na comunicação entre processos MPI: o regime dominado pela latência e o regime dominado pela largura de banda.
 	
-	\hspace{0.62cm}Por outro lado, à medida que o tamanho da mensagem aumentou para valores como 100 KB e 1 MB, o tempo total cresceu de forma acentuada. Isso indica que, para mensagens maiores, o fator predominante passa a ser a \textbf{largura de banda}, que corresponde à capacidade do sistema de transmitir grandes volumes de dados em determinado intervalo de tempo.
+	Para tamanhos de mensagens muito pequenos, como 8 bytes e 1 KB, observou-se que o tempo total de execução das trocas variou muito pouco, evidenciando que o fator preponderante foi a \textbf{latência} da comunicação — ou seja, o tempo fixo necessário para iniciar cada envio e recebimento de mensagem, independentemente do volume de dados transmitido.
 	
-	\hspace{0.62cm}O comportamento observado é característico de sistemas de comunicação paralela e confirma as expectativas teóricas. No gráfico apresentado, é possível identificar uma região inicial quase constante (regime de latência dominante) e uma região de crescimento quase linear (regime de largura de banda dominante).
+	Por outro lado, à medida que o tamanho da mensagem aumentou para valores como 100 KB e 1 MB, o tempo total cresceu de forma acentuada. Isso indica que, para mensagens maiores, o fator predominante passa a ser a \textbf{largura de banda}, que corresponde à capacidade do sistema de transmitir grandes volumes de dados em determinado intervalo de tempo.
+	
+	O comportamento observado é característico de sistemas de comunicação paralela e confirma as expectativas teóricas. No gráfico apresentado, é possível identificar uma região inicial quase constante (regime de latência dominante) e uma região de crescimento quase linear (regime de largura de banda dominante).
 	
 	\section{Conclusão}
 	
 	\hspace{0.62cm}A realização desta atividade permitiu compreender de forma prática como o tempo de comunicação entre processos em sistemas paralelos é influenciado tanto pela latência quanto pela largura de banda. A implementação do programa "ping-pong" utilizando a biblioteca MPI proporcionou a observação direta desses dois regimes, evidenciando como, para mensagens pequenas, a latência é o fator determinante, enquanto para mensagens maiores, a largura de banda se torna o elemento preponderante.
 	
-	\hspace{0.62cm}Além disso, a análise dos resultados demonstrou a importância de considerar o tamanho das mensagens na otimização do desempenho de aplicações paralelas, uma vez que diferentes tamanhos podem impactar significativamente o tempo total de comunicação. A utilização de técnicas de medição precisas, como o uso da função \texttt{MPI\_Wtime} e a sincronização com \texttt{MPI\_Barrier}, também se mostrou essencial para garantir a confiabilidade dos resultados.
+	Além disso, a análise dos resultados demonstrou a importância de considerar o tamanho das mensagens na otimização do desempenho de aplicações paralelas, uma vez que diferentes tamanhos podem impactar significativamente o tempo total de comunicação. A utilização de técnicas de medição precisas, como o uso da função \texttt{MPI\_Wtime} e a sincronização com \texttt{MPI\_Barrier}, também se mostrou essencial para garantir a confiabilidade dos resultados.
 	
-	\hspace{0.62cm}Por fim, a atividade contribuiu para consolidar os conhecimentos sobre comunicação paralela com MPI, bem como sobre a importância da análise empírica no entendimento do comportamento de sistemas distribuídos.
+	Por fim, a atividade contribuiu para consolidar os conhecimentos sobre comunicação paralela com MPI, bem como sobre a importância da análise empírica no entendimento do comportamento de sistemas distribuídos.
 	
 \end{document}

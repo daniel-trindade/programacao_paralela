@@ -31,46 +31,21 @@
 	\hspace{0.62cm}Implemente uma simulação da difusão de calor em uma barra 1D, dividida entre dois ou mais processos MPI. Cada processo deve simular um trecho da barra com células extras para troca de bordas com vizinhos. Implemente três versões: uma com \texttt{MPI\_Send/MPI\_Recv}, outra com \texttt{MPI\_Isend/ MPI\_Irecv} e \texttt{MPI\_Wait}, e uma terceira usando \texttt{MPI\_Test} para atualizar os pontos internos enquanto aguarda a comunicação. Compare os tempos de execução e discuta os ganhos com sobreposição de comunicação e computação.
 	
 	\section{Desenvolvimento}
-	Para atender aos requisitos da atividade, foram desenvolvidas três versões de um programa em C com MPI para simular a difusão de calor unidimensional. A equação de difusão do calor discretizada utilizada é:
-	$$ u'_i = u_i + \alpha (u_{i-1} - 2u_i + u_{i+1}) $$
-	onde $u_i$ é a temperatura no ponto $i$, $u'_i$ é a nova temperatura após um intervalo de tempo, e $\alpha$ é a constante de difusividade térmica.
+	\hspace{0.62cm}Para atender aos requisitos da atividade, foram desenvolvidas três versões de um programa em C com MPI para simular a difusão de calor unidimensional. 
 	
-	Em todas as implementações, a barra 1D de tamanho $N$ é dividida entre os $P$ processos MPI, onde cada processo é responsável por calcular a temperatura de um segmento de $N/P$ células. Para permitir a troca de informações de contorno com os processos vizinhos, cada processo aloca duas células extras (ghost cells), uma no início e outra no fim de seu subdomínio local. A inicialização da barra atribui um valor de temperatura elevado (e.g., 100.0) a uma célula central da barra global e zero às demais. As condições de contorno globais da barra são fixas em 0.0. O tempo de execução de cada simulação é medido utilizando \texttt{MPI\_Wtime()} e o tempo máximo entre todos os processos é obtido com \texttt{MPI\_Reduce}.
+	Em todas as implementações, a barra 1D de tamanho $N$ é dividida entre os $P$ processos MPI, onde cada processo é responsável por calcular a temperatura de um segmento de $N/P$ células. Para permitir a troca de informações de contorno com os processos vizinhos, cada processo aloca duas células extras (ghost cells), uma no início e outra no fim de seu subdomínio local. A inicialização da barra atribui um valor de temperatura elevado a uma célula central da barra global e zero às demais. As condições de contorno globais da barra são fixas em 0.0. O tempo de execução de cada simulação é medido utilizando \texttt{MPI\_Wtime()} e o tempo máximo entre todos os processos é obtido com \texttt{MPI\_Reduce}.
 	
-	As três versões implementadas diferem na forma como a comunicação das células de borda é
-	realizada
+	As três versões implementadas diferem na forma como a comunicação das células de borda é realizada da seguinte forma:
 	
-	\subsection*{Versão 1: \texttt{MPI\_Send} / \texttt{MPI\_Recv}}
-	Nesta implementação, a troca de dados das células de borda é realizada utilizando as funções bloqueantes \texttt{MPI\_Send} e \texttt{MPI\_Recv}. Cada processo:
 	\begin{itemize}
-		\item Envia o valor da sua primeira célula útil (fronteira interna esquerda) para o vizinho da esquerda (se existir).
-		\item Recebe o valor da célula de borda do vizinho da esquerda em sua ghost cell esquerda (se existir).
-		\item Envia o valor da sua última célula útil (fronteira interna direita) para o vizinho da direita (se existir).
-		\item Recebe o valor da célula de borda do vizinho da direita em sua ghost cell direita (se existir).
-	\end{itemize}
-	Após a conclusão de todas as comunicações, o cálculo da nova temperatura para todas as células locais é realizado. A natureza bloqueante dessas chamadas implica que um processo pode ficar ocioso enquanto espera a conclusão de uma operação de envio ou recebimento.
-	
-	\subsection*{Versão 2: \texttt{MPI\_Isend} / \texttt{MPI\_Irecv} e \texttt{MPI\_Waitall}}
-	A segunda implementação utiliza as versões não bloqueantes das chamadas de comunicação, \texttt{MPI\_Isend} e \texttt{MPI\_Irecv}, para a troca das células de borda.
-	\begin{itemize}
-		\item Para cada vizinho (esquerdo e direito, se existirem), o processo inicia um recebimento não bloqueante (\texttt{MPI\_Irecv}) para a ghost cell correspondente.
-		\item Em seguida, inicia um envio não bloqueante (\texttt{MPI\_Isend}) da sua célula de fronteira interna para o respectivo vizinho.
+		\item \textbf{Versão 1:} - Nesta implementação, a troca de dados das células de borda é realizada utilizando as funções bloqueantes \texttt{MPI\_Send} e \texttt{MPI\_Recv}. A natureza bloqueante dessas chamadas implica que um processo pode ficar ocioso enquanto espera a conclusão de uma operação de envio ou recebimento.
+		
+		\item \textbf{Versão 2:} - A segunda implementação utiliza as versões não bloqueantes das chamadas de comunicação, \texttt{MPI\_Isend} e \texttt{MPI\_Irecv}, para a troca das células de borda. Após iniciar todas as operações de comunicação necessárias, a função \texttt{MPI\_Waitall} é chamada. Esta função bloqueia o processo até que todas as comunicações não bloqueantes (tanto envios quanto recebimentos) especificadas sejam concluídas. Somente após o retorno de \texttt{MPI\_Waitall}, o cálculo da nova temperatura para todas as células locais é efetuado. Nesta abordagem, embora as operações sejam não bloqueantes, a computação dos pontos da malha só ocorre após a finalização de toda a comunicação.
+		
+		\item \textbf{Versão 3 (mpi\_test.c):} - Esta terceira versão também emprega chamadas de comunicação não bloqueantes, \texttt{MPI\_Isend} e \texttt{MPI\_Irecv}, para a troca de dados das células de borda. No entanto, adota uma estratégia para tentar sobrepor o cálculo com a comunicação. Após iniciar as operações de envio e recebimento não bloqueantes, o programa prossegue para calcular os valores dos pontos internos do domínio local (aqueles que não são imediatamente adjacentes às células fantasmas), que não dependem dos dados das células fantasmas que estão sendo trocadas naquele momento. Em seguida, utiliza a função \texttt{MPI\_Test} em laços dedicados para verificar ativamente a conclusão das operações de recebimento (\texttt{MPI\_Irecv}) das células de borda. Uma vez que o recebimento de dados de uma borda específica é confirmado por \texttt{MPI\_Test} (indicando que a célula fantasma correspondente foi preenchida), o cálculo para o ponto da malha adjacente a essa borda é realizado. Finalmente, a função \texttt{MPI\_Wait} é chamada para cada operação de envio (\texttt{MPI\_Isend}) para garantir que estas também tenham sido concluídas. Esta abordagem visa maximizar a utilização da CPU, permitindo que os cálculos dos pontos internos ocorram enquanto as comunicações das bordas estão em andamento, e processando os pontos de borda assim que seus dados necessários se tornam disponíveis, antes de garantir a finalização dos envios.
+		
 	\end{itemize}
 	
-	Após iniciar todas as operações de comunicação necessárias, a função \texttt{MPI\_Waitall} é chamada. Esta função bloqueia o processo até que todas as comunicações não bloqueantes (tanto envios quanto recebimentos) especificadas sejam concluidas. Somente após o retorno de \texttt{MPI\_Waitall}, o cálculo da nova temperatura para todas as células locais é efetuado. Nesta abordagem, embora as operações sejam não bloqueantes, a computação dos pontos da malha só ocorre após a finalização de toda acomunicação.
-	
-	\subsection*{Versão 3: \texttt{MPI\_Isend} / \texttt{MPI\_Irecv} e \texttt{MPI\_Test}}
-	A terceira implementa\c{c}\~ao (arquivo \texttt{mpi\_test.c}) visa sobrepor a computa\c{c}\~ao com a comunica\c{c}\~ao, utilizando \texttt{MPI\_Isend}, \texttt{MPI\_Irecv} e \texttt{MPI\_Test}[cite: 6]. O fluxo de opera\c{c}\~oes em cada itera\c{c}\~ao \'e:
-	\begin{itemize}
-		\item S\~ao iniciadas as opera\c{c}\~oes n\~ao bloqueantes de recebimento (\texttt{MPI\_Irecv}) das ghost cells dos vizinhos esquerdo e direito, se existirem.
-		\item S\~ao iniciadas as opera\c{c}\~oes n\~ao bloqueantes de envio (\texttt{MPI\_Isend}) das c\'elulas de fronteira internas para os respectivos vizinhos, se existirem.
-		\item Imediatamente ap\'os iniciar as comunica\c{c}\~oes, o c\'alculo dos \textbf{pontos internos} do subdom\'inio local (aqueles que n\~ao dependem dos valores das ghost cells rec\'em-recebidas) \'e realizado. Isso permite que a computa\c{c}\~ao desses pontos ocorra em paralelo com a transfer\^encia de dados das bordas.
-		\item Em seguida, o programa entra em la\c{c}os que utilizam \texttt{MPI\_Test} para verificar repetidamente se os dados das ghost cells j\'a foram recebidos. \texttt{MPI\_Test} \'e uma chamada n\~ao bloqueante que verifica o status de uma comunica\c{c}\~ao pendente.
-		\item Assim que \texttt{MPI\_Test} indica que um recebimento foi conclu\'ido para uma determinada borda (e.g., esquerda), o c\'alculo do ponto adjacente a essa borda (e.g., $u'_{1}$) \'e realizado. O mesmo processo \'e feito para a outra borda.
-		\item Finalmente, \texttt{MPI\_Wait} \'e chamado para cada opera\c{c}\~ao de envio pendente para garantir sua conclus\~ao antes de prosseguir para a pr\'oxima itera\c{c}\~ao, embora o impacto principal da sobreposi\c{c}\~ao seja obtido ao computar os pontos internos enquanto se espera pelos recebimentos.
-	\end{itemize}
-	Esta abordagem tem o potencial de reduzir o tempo ocioso do processador, melhorando a efici\^encia da paraleliza\c{c}\~ao.
-	
-	
+	\section{Resultados}
 	
 \end{document}
