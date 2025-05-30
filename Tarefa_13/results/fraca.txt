@@ -1,0 +1,19 @@
+Politica True
+
+matriz 20x20x20 | Tempo de execução: 0.520535 segundos
+matriz 20x20x40 | Tempo de execução: 0.982301 segundos
+matriz 20x20x80 | Tempo de execução: 1.886696 segundos
+matriz 20x20x160 | Tempo de execução: 3.707327 segundos
+matriz 20x20x320 | Tempo de execução: 7.402420 segundos
+matriz 20x20x640 | Tempo de execução: 16.679560 segundos
+
+
+
+Politica False
+Tempo de execução com 1 Thread: 
+matriz 20x20x20 | Tempo de execução: 0.400770 segundos
+matriz 20x20x40 | Tempo de execução: 0.734062 segundos
+matriz 20x20x80 | Tempo de execução: 1.341315 segundos
+matriz 20x20x160 | Tempo de execução: 2.624529 segundos
+matriz 20x20x320 | Tempo de execução: 5.274845 segundos
+matriz 20x20x640 | Tempo de execução: 11.890356 segundos

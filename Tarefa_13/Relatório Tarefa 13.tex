@@ -5,6 +5,8 @@
 \usepackage{array}
 \usepackage{geometry}
 \usepackage{placeins}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
 
 \begin{document}
 	\begin{center}
@@ -45,112 +47,129 @@
 		\item \textbf{\texttt{false}} — Desativa a afinidade de \textit{threads} o escalonador do sistema operacional é quem vai decidir onde cada \textit{thread} ficará. Com isso pode haver migração de \textit{threads} entre núcleos causando mais overhead e menos previsibilidade;
 	\end{itemize}
 	
-	\hspace{0.62cm}Reorganizamos o código de forma a possibilitar o teste de todas as políticas em uma única execução. Assim como realizado na Tarefa 12, o código foi executado com 1, 2, 4, 8, 16 e 32 \textit{threads}, para que ao final pudéssemos analisar se houve influência dessas políticas de afinidade na eficiência do código.
+	Reorganizamos o código de forma a possibilitar o teste de todas as políticas em uma única execução. Assim como realizado na Tarefa 12, o código foi executado com 1, 2, 4, 8, 16 e 32 \textit{threads}, para que ao final pudéssemos analisar se houve influência dessas políticas de afinidade na eficiência do código.
 	
 	O código foi executado no super computador da universidade utilizando o nó com o processador intel-128, cada teste foi executado 6 vezes para termos a certeza da constância dos resultados.
 	
 	\section{Resultados}
-	Tendo em vista que a ideia é observar como as politicas de afinidade de \textit{thread} afetam a escalabilidade do nosso programa, faremos uma tabela de escalabilidade para cada politica o metodo para criação dessa tabela já foi visto anteriormente na tarefa 12.
+	\hspace{0.62cm}Iniciaremos avaliando a escalabilidade forte fixando o tamanho de nosso problema e aumentando o número de threads utilizados para o processamento. A figura abaixo mostra nossos resultados: 
 	
+	\begin{center}
+		\begin{tikzpicture}
+			\begin{axis}[
+				title={Speedup vs. Número de Threads por Política de Afinidade},
+				xlabel={Número de Threads},
+				ylabel={Speedup},
+				xmode=log,                      % Eixo X em escala logarítmica
+				log ticks with fixed point,     % Formato dos ticks no eixo log
+				xtick={1,2,4,8,16,32},
+				xticklabels={1,2,4,8,16,32},
+				legend pos=north west,          % Posição da legenda
+				grid=major,                     % Adiciona grade principal
+				width=14cm,                     % Largura do gráfico
+				height=10cm,                    % Altura do gráfico
+				ymin=0,                         % Valor mínimo do eixo Y
+				% ymax pode ser ajustado conforme necessário, mas pgfplots geralmente lida bem automaticamente
+				]
+				
+				% Dados para o gráfico
+				% Politica True
+				\addplot+[mark=*, smooth] coordinates {
+					(1, 1.000000) (2, 1.041223) (4, 1.770291) (8, 2.670522) (16, 3.241188) (32, 3.337166)
+				};
+				\addlegendentry{Política True}
+				
+				% Politica False
+				\addplot+[mark=square*, smooth] coordinates {
+					(1, 1.000000) (2, 1.681153) (4, 2.691582) (8, 3.568715) (16, 3.965107) (32, 3.553509)
+				};
+				\addlegendentry{Política False}
+				
+				% Politica Spread
+				\addplot+[mark=triangle*, smooth] coordinates {
+					(1, 1.000000) (2, 1.672246) (4, 2.680801) (8, 3.610364) (16, 4.168062) (32, 3.410142)
+				};
+				\addlegendentry{Política Spread}
+				
+				% Politica Master
+				\addplot+[mark=diamond*, smooth] coordinates {
+					(1, 1.000000) (2, 0.014110) (4, 0.004771) (8, 0.002045) (16, 0.000951) (32, 0.000461)
+				};
+				\addlegendentry{Política Master}
+				
+				% Politica Close
+				\addplot+[mark=pentagon*, smooth] coordinates {
+					(1, 1.000000) (2, 1.165592) (4, 2.160008) (8, 3.698040) (16, 5.795370) (32, 9.137857)
+				};
+				\addlegendentry{Política Close}
+				
+			\end{axis}
+		\end{tikzpicture}
 	
-	\subsection{Spread}
-	\begin{table}[h!]
-		\centering
-		\begin{tabular}{|c|c|c|c|c|c|c|}
-			\hline
-			\textbf{\# cores} & \textbf{20x20x20} & \textbf{20x20x40} & \textbf{20x20x80} & \textbf{20x20x160} & \textbf{20x20x320} & \textbf{20x20x640} \\ \hline
-			1                 & 1.00              & 1.00              & 1.00              & 1.00               & 1.00               & 1.00               \\ \hline
-			2                 & 0.45              & 0.46              & 0.48              & 0.49               & 0.50               & 0.50               \\ \hline
-			4                 & 0.19              & 0.22              & 0.23              & 0.24               & 0.21               & 0.25               \\ \hline
-			8                 & 0.07              & 0.09              & 0.11              & 0.11               & 0.11               & 0.12               \\ \hline
-			16                & 0.02              & 0.04              & 0.05              & 0.05               & 0.06               & 0.06               \\ \hline
-			32                & 0.01              & 0.01              & 0.02              & 0.02               & 0.03               & 0.03               \\ \hline
-		\end{tabular}
-		\caption{Tabela de Escalabilidade para Política Spread}
-		\label{tab:Tabela de Escalabilidade para Política Spread} % Label alterado para unicidade
-	\end{table}
+	\end{center}
 	
-	\FloatBarrier
+	Na figura abaixo temos o mesmo gráfico, mas com a curva do \textit{speedup} ideal para fins de comparação
+		
+	\begin{center}
 	
-	\subsection{Close}
-	\begin{table}[h!]
-		\centering
-		\begin{tabular}{|c|c|c|c|c|c|c|}
-			\hline
-			\textbf{\# cores} & \textbf{20x20x20} & \textbf{20x20x40} & \textbf{20x20x80} & \textbf{20x20x160} & \textbf{20x20x320} & \textbf{20x20x640} \\ \hline
-			1                 & 1.00              & 1.00              & 1.00              & 1.00               & 1.00               & 1.00               \\ \hline
-			2                 & 0.44              & 0.47              & 0.47              & 0.49               & 0.51               & 0.50               \\ \hline
-			4                 & 0.19              & 0.22              & 0.23              & 0.24               & 0.25               & 0.25               \\ \hline
-			8                 & 0.07              & 0.09              & 0.10              & 0.11               & 0.12               & 0.12               \\ \hline
-			16                & 0.02              & 0.04              & 0.04              & 0.05               & 0.06               & 0.06               \\ \hline
-			32                & 0.01              & 0.01              & 0.02              & 0.02               & 0.03               & 0.03               \\ \hline
-		\end{tabular}
-		\caption{Tabela de Escalabilidade para Política Close}
-		\label{tab:Tabela de Escalabilidade para Política Close}
-	\end{table}
-
-	
-	\FloatBarrier
-	
-	\subsection{Master}
-	\begin{table}[h!]
-		\centering
-		\begin{tabular}{|c|c|c|c|c|c|c|}
-			\hline
-			\textbf{\# cores} & \textbf{20x20x20} & \textbf{20x20x40} & \textbf{20x20x80} & \textbf{20x20x160} & \textbf{20x20x320} & \textbf{20x20x640} \\ \hline
-			1                 & 1.00              & 1.00              & 1.00              & 1.00               & 1.00               & 1.00               \\ \hline
-			2                 & 0.01              & 0.01              & 0.03              & 0.06               & 0.11               & 0.12               \\ \hline
-			4                 & 0.00              & 0.00              & 0.01              & 0.01               & 0.02               & 0.04               \\ \hline
-			8                 & 0.07              & 0.09              & 0.11              & 0.11               & 0.11               & 0.12               \\ \hline
-			16                & 0.02              & 0.04              & 0.05              & 0.05               & 0.06               & 0.06               \\ \hline
-			32                & 0.01              & 0.01              & 0.02              & 0.02               & 0.03               & 0.03               \\ \hline
-		\end{tabular}
-		\caption{Tabela de Escalabilidade para Política Master}
-		\label{tab:Tabela de Escalabilidade para Política Master} % Alterado para um novo label
-	\end{table}
-	
-	\vspace{5cm}
-	
-	\FloatBarrier
-	
-	\subsection{False}
-	\begin{table}[h!]
-		\centering
-		\begin{tabular}{|c|c|c|c|c|c|c|}
-			\hline
-			\textbf{\# cores} & \textbf{20x20x20} & \textbf{20x20x40} & \textbf{20x20x80} & \textbf{20x20x160} & \textbf{20x20x320} & \textbf{20x20x640} \\ \hline
-			1                 & 1.00              & 1.00              & 1.00              & 1.00               & 1.00               & 1.00               \\ \hline
-			2                 & 0.83              & 0.86              & 0.91              & 0.91               & 0.90               & 0.96               \\ \hline
-			4                 & 0.45              & 0.48              & 0.49              & 0.49               & 0.50               & 0.56               \\ \hline
-			8                 & 0.10              & 0.14              & 0.17              & 0.19               & 0.21               & 0.24               \\ \hline
-			16                & 0.05              & 0.07              & 0.08              & 0.09               & 0.10               & 0.12               \\ \hline
-			32                & 0.03              & 0.04              & 0.04              & 0.05               & 0.05               & 0.06               \\ \hline
-		\end{tabular}
-		\caption{Tabela de Escalabilidade para Política False}
-		\label{tab:Tabela de Escalabilidade para Política False} % Label alterado para unicidade
-	\end{table}
-	
-	
-	\FloatBarrier
-	
-	\subsection{True}
-	\begin{table}[h!]
-		\centering
-		\begin{tabular}{|c|c|c|c|c|c|c|}
-			\hline
-			\textbf{\# cores} & \textbf{20x20x20} & \textbf{20x20x40} & \textbf{20x20x80} & \textbf{20x20x160} & \textbf{20x20x320} & \textbf{20x20x640} \\ \hline
-			1                 & 1.00              & 1.00              & 1.00              & 1.00               & 1.00               & 1.00               \\ \hline
-			2                 & 0.44              & 0.47              & 0.48              & 0.49               & 0.49               & 0.50               \\ \hline
-			4                 & 0.19              & 0.22              & 0.23              & 0.24               & 0.25               & 0.25               \\ \hline
-			8                 & 0.07              & 0.09              & 0.11              & 0.11               & 0.12               & 0.12               \\ \hline
-			16                & 0.02              & 0.04              & 0.05              & 0.05               & 0.06               & 0.06               \\ \hline
-			32                & 0.01              & 0.01              & 0.02              & 0.02               & 0.02               & 0.03               \\ \hline
-		\end{tabular}
-		\caption{Insira a legenda da sua tabela aqui}
-		\label{tab:minha_tabela}
-	\end{table}	
-	
-	\FloatBarrier
+		
+		\begin{tikzpicture}
+			\begin{axis}[
+				title={Speedup vs. Número de Threads por Política de Afinidade},
+				xlabel={Número de Threads},
+				ylabel={Speedup},
+				xmode=log,                      % Eixo X em escala logarítmica
+				log ticks with fixed point,     % Formato dos ticks no eixo log
+				xtick={1,2,4,8,16,32},
+				xticklabels={1,2,4,8,16,32},
+				legend pos=north west,          % Posição da legenda
+				grid=major,                     % Adiciona grade principal
+				width=14cm,                     % Largura do gráfico
+				height=10cm,                    % Altura do gráfico
+				ymin=0,                         % Valor mínimo do eixo Y
+				ymax=35,                        % Ajustado para incluir o speedup ideal de 32
+				]
+				
+				% Curva de Speedup Ideal
+				\addplot+[mark=none, dashed, thick, color=black] coordinates {
+					(1, 1) (2, 2) (4, 4) (8, 8) (16, 16) (32, 32)
+				};
+				\addlegendentry{Speedup Ideal}
+				
+				% Dados para o gráfico - Políticas Reais
+				% Politica True
+				\addplot+[mark=*, smooth] coordinates {
+					(1, 1.000000) (2, 1.041223) (4, 1.770291) (8, 2.670522) (16, 3.241188) (32, 3.337166)
+				};
+				\addlegendentry{Política True}
+				
+				% Politica False
+				\addplot+[mark=square*, smooth] coordinates {
+					(1, 1.000000) (2, 1.681153) (4, 2.691582) (8, 3.568715) (16, 3.965107) (32, 3.553509)
+				};
+				\addlegendentry{Política False}
+				
+				% Politica Spread
+				\addplot+[mark=triangle*, smooth] coordinates {
+					(1, 1.000000) (2, 1.672246) (4, 2.680801) (8, 3.610364) (16, 4.168062) (32, 3.410142)
+				};
+				\addlegendentry{Política Spread}
+				
+				% Politica Master
+				\addplot+[mark=diamond*, smooth] coordinates {
+					(1, 1.000000) (2, 0.014110) (4, 0.004771) (8, 0.002045) (16, 0.000951) (32, 0.000461)
+				};
+				\addlegendentry{Política Master}
+				
+				% Politica Close
+				\addplot+[mark=pentagon*, smooth] coordinates {
+					(1, 1.000000) (2, 1.165592) (4, 2.160008) (8, 3.698040) (16, 5.795370) (32, 9.137857)
+				};
+				\addlegendentry{Política Close}
+				
+			\end{axis}
+		\end{tikzpicture}
+	\end{center}
 		
 	\section{Analise dos Resultados}
 	

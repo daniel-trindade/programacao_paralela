@@ -1,47 +1,47 @@
 Matriz=20x20x20
-Threads: 1 | Tempo de execução: 1.413809 segundos
-Threads: 2 | Tempo de execução: 1.599925 segundos
-Threads: 4 | Tempo de execução: 1.882036 segundos
-Threads: 8 | Tempo de execução: 2.428781 segundos
-Threads: 16 | Tempo de execução: 3.607661 segundos
-Threads: 32 | Tempo de execução: 6.117946 segundos
+Threads: 1 | Tempo de execução: 61.367158 segundos
+Threads: 2 | Tempo de execução: 52.648937 segundos
+Threads: 4 | Tempo de execução: 28.410611 segundos
+Threads: 8 | Tempo de execução: 16.594509 segundos
+Threads: 16 | Tempo de execução: 10.588997 segundos
+Threads: 32 | Tempo de execução: 6.715706 segundos
 
 Matriz=20x20x40
-Threads: 1 | Tempo de execução: 3.000279 segundos
-Threads: 2 | Tempo de execução: 3.201575 segundos
-Threads: 4 | Tempo de execução: 3.475057 segundos
-Threads: 8 | Tempo de execução: 4.061383 segundos
-Threads: 16 | Tempo de execução: 5.206614 segundos
-Threads: 32 | Tempo de execução: 7.720840 segundos
+Threads: 1 | Tempo de execução: 2.919714 segundos
+Threads: 2 | Tempo de execução: 2.765576 segundos
+Threads: 4 | Tempo de execução: 1.558578 segundos
+Threads: 8 | Tempo de execução: 0.991066 segundos
+Threads: 16 | Tempo de execução: 0.752753 segundos
+Threads: 32 | Tempo de execução: 0.636004 segundos
 
 Matrix=20x20x80
-Threads: 1 | Tempo de execução: 6.100755 segundos
-Threads: 2 | Tempo de execução: 6.466945 segundos
-Threads: 4 | Tempo de execução: 6.732872 segundos
-Threads: 8 | Tempo de execução: 7.306241 segundos
-Threads: 16 | Tempo de execução: 8.544444 segundos
-Threads: 32 | Tempo de execução: 10.987308 segundos
+Threads: 1 | Tempo de execução: 6.192941 segundos
+Threads: 2 | Tempo de execução: 5.713609 segundos
+Threads: 4 | Tempo de execução: 3.063783 segundos
+Threads: 8 | Tempo de execução: 1.886252 segundos
+Threads: 16 | Tempo de execução: 1.347795 segundos
+Threads: 32 | Tempo de execução: 1.047823 segundos
 
 Matrix=20x20x160
-Threads: 1 | Tempo de execução: 12.539322 segundos
-Threads: 2 | Tempo de execução: 12.800742 segundos
-Threads: 4 | Tempo de execução: 13.049773 segundos
-Threads: 8 | Tempo de execução: 13.628761 segundos
-Threads: 16 | Tempo de execução: 14.797363 segundos
-Threads: 32 | Tempo de execução: 17.388559 segundos
+Threads: 1 | Tempo de execução: 12.340920 segundos
+Threads: 2 | Tempo de execução: 11.574721 segundos
+Threads: 4 | Tempo de execução: 6.130724 segundos
+Threads: 8 | Tempo de execução: 3.699682 segundos
+Threads: 16 | Tempo de execução: 2.534167 segundos
+Threads: 32 | Tempo de execução: 1.834075 segundos
 
 Matrix=20x20x320
-Threads: 1 | Tempo de execução: 27.034337 segundos
-Threads: 2 | Tempo de execução: 26.671683 segundos
-Threads: 4 | Tempo de execução: 26.932731 segundos
-Threads: 8 | Tempo de execução: 28.583735 segundos
-Threads: 16 | Tempo de execução: 29.635280 segundos
-Threads: 32 | Tempo de execução: 31.737295 segundos
+Threads: 1 | Tempo de execução: 26.335100 segundos
+Threads: 2 | Tempo de execução: 23.889215 segundos
+Threads: 4 | Tempo de execução: 12.535533 segundos
+Threads: 8 | Tempo de execução: 7.414386 segundos
+Threads: 16 | Tempo de execução: 4.892722 segundos
+Threads: 32 | Tempo de execução: 3.354102 segundos
 
 Matrix=20x20x640
-Threads: 1 | Tempo de execução: 61.460100 segundos
-Threads: 2 | Tempo de execução: 61.653946 segundos
-Threads: 4 | Tempo de execução: 61.992783 segundos
-Threads: 8 | Tempo de execução: 62.535634 segundos
-Threads: 16 | Tempo de execução: 63.830673 segundos
-Threads: 32 | Tempo de execução: 66.678986 segundos
+Threads: 1 | Tempo de execução: 61.614337 segundos
+Threads: 2 | Tempo de execução: 53.001534 segundos
+Threads: 4 | Tempo de execução: 28.744313 segundos
+Threads: 8 | Tempo de execução: 16.907755 segundos
+Threads: 16 | Tempo de execução: 10.881762 segundos
+Threads: 32 | Tempo de execução: 7.018536 segundos

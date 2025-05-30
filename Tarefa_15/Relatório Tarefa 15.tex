@@ -2,9 +2,8 @@
 \usepackage[top=1.8cm, bottom=1.8cm, left=1.5cm, right=1.5cm]{geometry}
 \usepackage{float}
 \usepackage[utf8]{inputenc}
-\usepackage[brazil]{babel}
 \usepackage{pgfplots}
-\pgfplotsset{compat=1.17} % ou a versão que você tiver
+\pgfplotsset{width=10cm, compat=1.18}
 
 
 
@@ -47,5 +46,37 @@
 	\end{itemize}
 	
 	\section{Resultados}
+	
+	\begin{center}
+		\begin{tikzpicture}
+			\begin{axis}[
+				title={Comparação de Tempos de Execução de Métodos MPI},
+				ybar,
+				bar width=0.6cm,
+				enlargelimits=0.15,
+				legend style={at={(0.5,-0.25)},
+					anchor=north,
+					legend columns=-1},
+				ylabel={Tempo de execução (s)},
+				symbolic x coords={mpi\_send/recv, mpi\_Isend/Irecv/wait, mpi\_test},
+				xtick=data,
+				nodes near coords,
+				nodes near coords style={font=\small, yshift=2pt},
+				ymin=11.4,  % Valor mínimo do eixo Y
+				ymax=11.7,   % Valor máximo do eixo Y
+				ytick={11.4,11.5,11.6,11.7},
+				xticklabel style={rotate=45, anchor=east},
+				point meta=y,  % Mostra valores exatos
+				]
+				
+				\addplot[fill=blue!40] coordinates {
+					(mpi\_send/recv, 11.539983)
+					(mpi\_Isend/Irecv/wait, 11.589845)
+					(mpi\_test, 11.582980)
+				};
+				
+			\end{axis}
+		\end{tikzpicture}
+	\end{center}
 	
 \end{document}
