@@ -16,7 +16,7 @@
 		
 		DCA3703 - Programação Paralela  
 		
-		\textbf{Tarefa 14: Latência de comunicação usando MPI}  
+		\textbf{Tarefa 15: Difusão de calor usando MPI}  
 		
 		\textbf{Aluno:} Daniel Bruno Trindade da Silva  
 	\end{center}  
@@ -94,6 +94,22 @@
 		\label{fig:mpi_communication_times_ms} 
 		
 	\end{figure}
+	
+	\section{Análise dos Resultados}
+	
+	\hspace{0.62cm}A Figura~\ref{fig:mpi_communication_times_ms} apresenta os tempos de execução medidos para as três versões implementadas da simulação de difusão de calor, utilizando diferentes estratégias de comunicação com MPI. Observa-se que a versão que utiliza \texttt{MPI\_Send/MPI\_Recv}, com comunicação bloqueante, apresentou o maior tempo de execução, aproximadamente \textbf{115,626 ms}. Isso ocorre devido ao comportamento bloqueante dessas funções, que força o processo a aguardar a conclusão de cada envio ou recebimento antes de prosseguir, resultando em períodos de inatividade (ociosos) e menor aproveitamento do processador.
+	
+	Em contrapartida, as versões que utilizam comunicação não bloqueante (\texttt{MPI\_Isend}/\texttt{MPI\_Irecv}) apresentaram desempenhos superiores. A versão intermediária, que utiliza \texttt{MPI\_Waitall} para aguardar a conclusão de todas as comunicações antes de iniciar o cálculo, apresentou um tempo de execução de aproximadamente \textbf{65,367 ms}, representando uma redução de cerca de \textbf{43,5\%} em relação à versão bloqueante. Isso evidencia que, mesmo sem explorar plenamente a sobreposição entre comunicação e computação, a simples adoção de operações não bloqueantes reduz significativamente o tempo de execução, ao evitar bloqueios desnecessários durante o envio e recebimento de mensagens.
+	
+	Por fim, a versão mais otimizada, que utiliza \texttt{MPI\_Test} para verificar dinamicamente a conclusão das comunicações de borda e iniciar o cálculo dos pontos internos enquanto a comunicação ainda está em andamento, apresentou um tempo de execução de \textbf{68,177 ms}. Embora esse valor seja ligeiramente superior ao obtido com \texttt{MPI\_Waitall}, ainda representa uma redução significativa em relação à versão bloqueante. A pequena diferença entre as versões com e sem sobreposição pode ser atribuída ao tamanho relativamente pequeno da malha processada ou ao custo associado à verificação contínua das operações com \texttt{MPI\_Test}, o que pode não ter proporcionado um ganho expressivo no cenário considerado.
+	
+	Além da redução do tempo de execução, foi possível observar o impacto positivo da sobreposição de comunicação e computação no \textbf{throughput} do programa, medido em milhões de operações de ponto flutuante por segundo (Mflops/s). A versão bloqueante apresentou um throughput de aproximadamente \textbf{43,0 Mflops/s}, enquanto as versões não bloqueantes atingiram \textbf{76,1 Mflops/s} (\texttt{MPI\_Isend}/\texttt{MPI\_Irecv}/\texttt{MPI\_Wait}) e \textbf{73,0 Mflops/s} (\texttt{MPI\_Test}), evidenciando um aumento significativo na eficiência computacional quando se reduz o tempo de espera na comunicação.
+	
+	Em síntese, os resultados demonstram claramente os benefícios da utilização de comunicações não bloqueantes em programas paralelos com MPI, tanto na redução do tempo de execução quanto no aumento do throughput. A versão com sobreposição total de comunicação e computação, embora não tenha superado em desempenho absoluto a versão com \texttt{MPI\_Waitall}, apresenta vantagens conceituais importantes, especialmente em cenários com maior carga computacional ou comunicações mais custosas, nos quais a sobreposição pode resultar em ganhos ainda mais expressivos.
+	
+	\section{Conclusão}
+	
+	\hspace{0.62cm}A realização desta atividade permitiu compreender, na prática, como diferentes estratégias de comunicação impactam o desempenho de aplicações paralelas. As versões que utilizam comunicação não bloqueante apresentaram tempos de execução inferiores à versão bloqueante, confirmando a eficiência da sobreposição entre comunicação e computação. Além disso, a versão com \texttt{MPI\_Test} mostrou-se vantajosa ao permitir o aproveitamento do tempo de espera para realizar cálculos, evidenciando a importância de técnicas que exploram a simultaneidade entre comunicação e processamento em sistemas distribuídos.	
 	
 	\end{document}
 	
