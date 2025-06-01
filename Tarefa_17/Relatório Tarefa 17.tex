@@ -118,7 +118,7 @@
 		\multirow{2}{*}{4096 x 4096} & Por linhas  & 0.024350 & 0.019467 & 0.026092 & 0.018572 & 0.033169 \\
 		& Por colunas & 0.025716 & 0.027852 & 0.028952 & 0.017797 & 0.025117 \\
 		\hline
-		\multirow{2}{*}{8192 x 8192} & Por linhas  & 0.223196 & 0.174600 & 0.149724 & 0.073371 & 0.080450 \\
+		\multirow{2}{*}{8192 x 8192} & Por linhas  & 0.103332 & 0.062595 & 0.058050 & 0.032905 & 0.045219 \\
 		& Por colunas & 0.093287 & 0.071059 & 0.063350 & 0.034189 & 0.038946 \\
 		\hline
 		\multirow{2}{*}{16384 x 16384} & Por linhas  & 0.336517 & 0.201913 & 0.159433 & 0.076215 & 0.075465 \\
@@ -231,14 +231,12 @@
 	Esse comportamento confirma que, para grandes volumes de dados, o custo de comunicação torna-se amortizado pela expressiva redução no tempo de processamento proporcionada pela divisão de trabalho entre múltiplos processos.
 	
 	\subsection{Análise Comparativa entre Distribuição por Colunas e por Linhas}
-	Os tempos de execução para ambas as abordagens, conforme apresentados nas respectivas tabelas de resultados, evidenciam comportamentos semelhantes, porém com algumas diferenças importantes:
+	A análise dos resultados revela uma clara dependência entre o tamanho da matriz e a eficiência das duas abordagens de paralelização. Para matrizes pequenas e médias (até 8192x8192), a distribuição por colunas apresenta desempenho competitivo. Isso sugere que, para esses tamanhos, o overhead de comunicação é o fator dominante e a abordagem por colunas consegue um melhor balanceamento da carga computacional. Entretanto, esse cenário se inverte drasticamente quando analisamos matrizes maiores.
 	
-	\begin{itemize}
-		\item Nas matrizes de menor porte, os tempos de execução da abordagem por linhas foram, em geral, ligeiramente menores do que os obtidos com a abordagem por colunas. Por exemplo, para a matriz 2048 x 2048 com 2 processos, o tempo foi de 7,4 ms na abordagem por linhas contra 8,5 ms na abordagem por colunas.
-		
-		\item Para matrizes de tamanhos médios e grandes, a abordagem por colunas apresentou uma redução expressiva no tempo de execução em relação à abordagem por linhas.
-	\end{itemize}
-
+	Para matrizes grandes (16384x16384 e superiores), a distribuição por linhas demonstra superioridade evidente, sendo 250-370\% mais rápida que a distribuição por colunas. Esta diferença é explicada pela localidade de memória: como C armazena matrizes em formato row-major, o acesso sequencial às linhas aproveita melhor o cache do processador, enquanto o acesso às colunas gera cache misses frequentes que degradam significativamente a performance. Adicionalmente, o overhead dos tipos derivados MPI (\texttt{MPI\_Type\_vector}) necessários para a distribuição por colunas se torna proibitivo conforme o tamanho da matriz aumenta, tornando a abordagem por linhas mais robusta e previsível para aplicações de grande escala.
 	
+	\section{Conclusão}
+	\hspace{0.62cm}A implementação da distribuição por colunas utilizando \texttt{MPI\_Type\_vector} e \texttt{MPI\_Type\_create\_resized} foi realizada com sucesso, permitindo a distribuição de dados não-contíguos e agregação via \texttt{MPI\_Reduce}.
+	A análise comparativa revelou que a eficiência é fortemente dependente do tamanho da matriz. Para matrizes menores a distribuição por colunas foi competitiva, mas para matrizes grandes (16384x16384) tornou-se 250-370\% mais lenta devido aos cache misses causados pelo acesso não-sequencial em formato row-major do C. O overhead dos tipos derivados MPI também se intensifica com o tamanho da matriz, tornando a distribuição por linhas mais adequada para aplicações de grande escala.
 	
 \end{document}

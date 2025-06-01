@@ -16,11 +16,11 @@ Número de processos | tempo de execução (s)
 
 Tamanho da Matriz = 8192 x 8192
 Número de processos | tempo de execução (s)
-2  | 0.223196
-4  | 0.174600
-8  | 0.149724
-16 | 0.073371
-32 | 0.080450
+2  | 0.103332
+4  | 0.062595
+8  | 0.058050
+16 | 0.032905
+32 | 0.045219
 
 Tamanho da Matriz = 16384 x 16384
 Número de processos | tempo de execução (s)
