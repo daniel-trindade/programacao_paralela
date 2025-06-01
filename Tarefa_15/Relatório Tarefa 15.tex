@@ -47,36 +47,54 @@
 	
 	\section{Resultados}
 	
-	\begin{center}
+	\begin{figure}[htbp] 
+		\centering
 		\begin{tikzpicture}
 			\begin{axis}[
-				title={Comparação de Tempos de Execução de Métodos MPI},
-				ybar,
-				bar width=0.6cm,
-				enlargelimits=0.15,
-				legend style={at={(0.5,-0.25)},
-					anchor=north,
-					legend columns=-1},
-				ylabel={Tempo de execução (s)},
-				symbolic x coords={mpi\_send/recv, mpi\_Isend/Irecv/wait, mpi\_test},
-				xtick=data,
-				nodes near coords,
-				nodes near coords style={font=\small, yshift=2pt},
-				ymin=11.4,  % Valor mínimo do eixo Y
-				ymax=11.7,   % Valor máximo do eixo Y
-				ytick={11.4,11.5,11.6,11.7},
-				xticklabel style={rotate=45, anchor=east},
-				point meta=y,  % Mostra valores exatos
+				title={Tempo de Comunica\c{c}\~{a}o MPI}, % Título do gráfico
+				ybar,                                     % Define que é um gráfico de barras verticais
+				enlarge x limits=0.3,                     % Aumenta o espaço nas extremidades do eixo x
+				ylabel={Tempo (ms)},                      % Rótulo do eixo y (atualizado para milissegundos)
+				xlabel={},    % Rótulo do eixo x
+				symbolic x coords={                       % Define as coordenadas do eixo x simbolicamente
+					MPI\_Send / MPI\_Recv,
+					MPI\_Isend / MPI\_Irecv / MPI\_Wait,
+					MPI\_Test
+				},
+				xtick=data,                               % Coloca os ticks do eixo x em cada barra
+				nodes near coords,                        % Mostra o valor numérico perto do topo de cada barra
+				every node near coord/.append style={     % Estiliza os números no topo das barras
+					font=\scriptsize,                     % Define o tamanho da fonte dos números
+					/pgf/number format/.cd,               % Acessa as configurações de formato de número
+					fixed,                                % Usa formato de ponto fixo
+					precision=3,                          % Define 3 casas decimais para os números (conforme dados de entrada)
+					/tikz/.cd                             % Retorna ao caminho padrão do TikZ
+				},
+				nodes near coords align={above},          % Alinha os números acima das barras
+				ymin=0,                                   % Eixo y começa em 0
+				ymax=130,                                 % Valor máximo do eixo y (um pouco acima do maior valor: 115.626 ms)
+				bar width=25pt,                           % Largura das barras
+				xticklabel style={                        % Estiliza os rótulos do eixo x
+					anchor=center,                       
+					font=\scriptsize, 
+					yshift=-5pt                     
+				},
+				width=0.95\textwidth,
+				height=7cm,                      
+				legend pos=north east,                    % Posição da legenda (se houver)
 				]
-				
-				\addplot[fill=blue!40] coordinates {
-					(mpi\_send/recv, 11.539983)
-					(mpi\_Isend/Irecv/wait, 11.589845)
-					(mpi\_test, 11.582980)
+				\addplot coordinates {
+					(MPI\_Send / MPI\_Recv, 115.626)
+					(MPI\_Isend / MPI\_Irecv / MPI\_Wait, 65.367)
+					(MPI\_Test, 68.177)
 				};
-				
 			\end{axis}
 		\end{tikzpicture}
-	\end{center}
+		\caption{Tempo de execução do programa usando tipos de comunicação diferentes em milissegundos.}
+		\label{fig:mpi_communication_times_ms} 
+		
+	\end{figure}
+	
+	\end{document}
 	
 \end{document}

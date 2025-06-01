@@ -1,6 +1,16 @@
 /*
-Simulação da difusão de calor em uma barra 1D com MPI
-Versão MPI_Isend/Irecv otimizada para melhor desempenho
+Implemente uma simulação da difusão de calor
+em uma barra 1D, dividida entre dois ou mais
+processos MPI. Cada processo deve simular um
+trecho da barra com células extras para troca
+de bordas com vizinhos. Implemente três
+versões: uma com MPI_Send/ MPI_Recv, outra
+com MPI_Isend/ MPI_Irecv e MPI_Wait, e uma
+terceira usando MPI_Test para atualizar os
+pontos internos enquanto aguarda a
+comunicação. Compare os tempos de execução e
+discuta os ganhos com sobreposição de
+comunicação e computação.
 */
 
 #include <stdio.h>
@@ -42,10 +52,6 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    // Arrays para armazenar requests de comunicação
-    MPI_Request requests[8];  // 4 sends + 4 recvs máximo
-    MPI_Status statuses[8];
-    
     double total_time = 0.0;
     
     // Executa múltiplas vezes para obter média mais precisa
@@ -70,48 +76,43 @@ int main(int argc, char *argv[]) {
         double t_start = MPI_Wtime();
 
         for (int iter = 0; iter < MAX_ITERS; iter++) {
-            int req_count = 0;
-            
-            // Inicia todas as comunicações não-bloqueantes
-            // Envio para vizinho à direita
-            if (rank != size - 1) {
-                MPI_Isend(&u[local_N], HALO_SIZE, MPI_DOUBLE, rank + 1, 0, 
-                         MPI_COMM_WORLD, &requests[req_count++]);
-            }
-            
-            // Envio para vizinho à esquerda
-            if (rank != 0) {
-                MPI_Isend(&u[HALO_SIZE], HALO_SIZE, MPI_DOUBLE, rank - 1, 1, 
-                         MPI_COMM_WORLD, &requests[req_count++]);
-            }
-            
-            // Recebimento do vizinho à direita
-            if (rank != size - 1) {
-                MPI_Irecv(&u[local_N + HALO_SIZE], HALO_SIZE, MPI_DOUBLE, rank + 1, 1, 
-                         MPI_COMM_WORLD, &requests[req_count++]);
-            }
-            
-            // Recebimento do vizinho à esquerda  
-            if (rank != 0) {
-                MPI_Irecv(&u[0], HALO_SIZE, MPI_DOUBLE, rank - 1, 0, 
-                         MPI_COMM_WORLD, &requests[req_count++]);
-            }
-
-            // Aplica condições de contorno para processos nas extremidades
-            if (rank == 0) {
-                for (int i = 0; i < HALO_SIZE; i++) {
-                    u[i] = 0.0;
+            // Comunicação com vizinhos usando padrão par/ímpar para evitar deadlock
+            if (rank % 2 == 0) {
+                // Processos pares: enviam primeiro para a direita, depois para esquerda
+                if (rank != size - 1) {
+                    MPI_Send(&u[local_N], HALO_SIZE, MPI_DOUBLE, rank + 1, 0, MPI_COMM_WORLD);
+                    MPI_Recv(&u[local_N + HALO_SIZE], HALO_SIZE, MPI_DOUBLE, rank + 1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+                } else {
+                    // Processo final: condição de contorno
+                    for (int i = 0; i < HALO_SIZE; i++) {
+                        u[local_N + HALO_SIZE + i] = 0.0;
+                    }
                 }
-            }
-            if (rank == size - 1) {
-                for (int i = 0; i < HALO_SIZE; i++) {
-                    u[local_N + HALO_SIZE + i] = 0.0;
+                
+                if (rank != 0) {
+                    MPI_Send(&u[HALO_SIZE], HALO_SIZE, MPI_DOUBLE, rank - 1, 0, MPI_COMM_WORLD);
+                    MPI_Recv(&u[0], HALO_SIZE, MPI_DOUBLE, rank - 1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+                } else {
+                    // Processo inicial: condição de contorno
+                    for (int i = 0; i < HALO_SIZE; i++) {
+                        u[i] = 0.0;
+                    }
+                }
+            } else {
+                // Processos ímpares: recebem primeiro da esquerda, depois da direita
+                if (rank != 0) {
+                    MPI_Recv(&u[0], HALO_SIZE, MPI_DOUBLE, rank - 1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+                    MPI_Send(&u[HALO_SIZE], HALO_SIZE, MPI_DOUBLE, rank - 1, 0, MPI_COMM_WORLD);
+                }
+                
+                if (rank != size - 1) {
+                    MPI_Recv(&u[local_N + HALO_SIZE], HALO_SIZE, MPI_DOUBLE, rank + 1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+                    MPI_Send(&u[local_N], HALO_SIZE, MPI_DOUBLE, rank + 1, 0, MPI_COMM_WORLD);
                 }
             }
 
-            // Computação no interior (não depende das halo zones)
-            // Pode ser feita enquanto a comunicação está em andamento
-            for (int i = HALO_SIZE + 1; i < local_N + HALO_SIZE - 1; i++) {
+            // Cálculo da nova temperatura com computação adicional
+            for (int i = HALO_SIZE; i < local_N + HALO_SIZE; i++) {
                 // Operação principal de difusão
                 u_new[i] = u[i] + ALPHA * (u[i - 1] - 2 * u[i] + u[i + 1]);
                 
@@ -121,47 +122,13 @@ int main(int argc, char *argv[]) {
                 }
                 
                 // Operação adicional para simular problema mais complexo
-                double gradient = (u[i + 1] - u[i - 1]) / 2.0;
-                u_new[i] += 0.001 * gradient * gradient;
-            }
-
-            // Aguarda todas as comunicações terminarem
-            if (req_count > 0) {
-                MPI_Waitall(req_count, requests, statuses);
-            }
-
-            // Agora processa as bordas que dependem das halo zones
-            // Borda esquerda
-            if (local_N > 0) {
-                int i = HALO_SIZE;
-                u_new[i] = u[i] + ALPHA * (u[i - 1] - 2 * u[i] + u[i + 1]);
-                
-                for (int k = 0; k < 5; k++) {
-                    u_new[i] += 0.0001 * sin(u_new[i] * 0.1) * cos(u_new[i] * 0.1);
-                }
-                
-                if (i > HALO_SIZE && i < local_N + HALO_SIZE - 1) {
-                    double gradient = (u[i + 1] - u[i - 1]) / 2.0;
-                    u_new[i] += 0.001 * gradient * gradient;
-                }
-            }
-            
-            // Borda direita
-            if (local_N > 1) {
-                int i = local_N + HALO_SIZE - 1;
-                u_new[i] = u[i] + ALPHA * (u[i - 1] - 2 * u[i] + u[i + 1]);
-                
-                for (int k = 0; k < 5; k++) {
-                    u_new[i] += 0.0001 * sin(u_new[i] * 0.1) * cos(u_new[i] * 0.1);
-                }
-                
                 if (i > HALO_SIZE && i < local_N + HALO_SIZE - 1) {
                     double gradient = (u[i + 1] - u[i - 1]) / 2.0;
                     u_new[i] += 0.001 * gradient * gradient;
                 }
             }
 
-            // Atualiza todos os valores
+            // Atualiza valores
             for (int i = HALO_SIZE; i < local_N + HALO_SIZE; i++) {
                 u[i] = u_new[i];
             }
@@ -177,7 +144,7 @@ int main(int argc, char *argv[]) {
     MPI_Reduce(&avg_time, &max_avg_time, 1, MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD);
 
     if (rank == 0) {
-        printf("=== ISEND/IRECV VERSION ===\n");
+        printf("=== SEND/RECV VERSION ===\n");
         printf("Parametros: N=%d, ITERS=%d, PROCESSES=%d, HALO_SIZE=%d\n", 
                N, MAX_ITERS, size, HALO_SIZE);
         printf("Tempo medio (%d execucoes): %.6f segundos\n", NUM_RUNS, max_avg_time);
@@ -192,7 +159,7 @@ int main(int argc, char *argv[]) {
         double global_sum;
         MPI_Reduce(&local_sum, &global_sum, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
         printf("Energia total final: %.6f\n", global_sum);
-        printf("===========================\n\n");
+        printf("========================\n\n");
     } else {
         double local_sum = 0.0;
         for (int i = HALO_SIZE; i < local_N + HALO_SIZE; i++) {
