@@ -1,0 +1,135 @@
+\documentclass[a4paper, 12pt]{article}
+\usepackage[top=1.8cm, bottom=1.8cm, left=1.5cm, right=1.5cm]{geometry}
+\usepackage{float}
+\usepackage[utf8]{inputenc}
+\usepackage{pgfplots}
+\pgfplotsset{width=10cm, compat=1.18}
+
+
+\begin{document}
+	
+	\begin{center}
+		Universidade Federal do Rio Grande do Norte
+		
+		Departamento de Engenharia da Computação e Automação  
+		
+		DCA3703 - Programação Paralela  
+		
+		\textbf{Tarefa 16: Comunicação Coletiva com MPI}  
+		
+		\textbf{Aluno:} Daniel Bruno Trindade da Silva  
+	\end{center}  
+	
+	\section{Introdução}
+	
+	\hspace{0.62cm}Este relatório tem como objetivo apresentar os conhecimentos adquiridos durante a realização da Tarefa 15 da disciplina de \textbf{Programação Paralela}. A atividade teve como objetivo mensurar o tempo de comunicação entre os processos usando ferramentas do MPI. Para isso será realizada a implementação e análise de um programa que simulasse a difusão de calor em uma barra 1D. 
+	
+	\section{Enunciado}
+	
+	\hspace{0.62cm}Implemente um programa MPI que calcule o produto $y = A \cdot x$, onde A é uma matriz M×N e x é um vetor de tamanho N. Divida a matriz A por linhas entre os processos com \texttt{MPI\_Scatter}, e distribua o vetor x inteiro com \texttt{MPI\_Bcast}. Cada processo deve calcular os elementos de y correspondentes às suas linhas e enviá-los de volta ao processo 0 com \texttt{MPI\_Gather}. Compare os tempos com diferentes tamanhos de matriz e número de processos.
+	
+	\section{Desenvolvimento}
+	
+	\section{Resultados}
+	\begin{figure}[h!]
+		\centering
+		\begin{tikzpicture}
+			\begin{axis}[
+				title={Performance de Processamento de Matrizes},
+				xlabel={Tamanho da Matriz ($N \times N$)},
+				ylabel={Tempo de Execução (s)},
+				xmode=log, % Using log scale for matrix size due to large differences
+				ymode=log, % Using log scale for time as well, common for performance plots
+				legend pos=north west, % Position the legend
+				grid=major, % Add a grid
+				width=0.9\textwidth, % Adjust width
+				height=0.5\textheight, % Adjust height
+				xtick={2048, 4096, 8192, 16384, 32768}, % Specify x-axis ticks
+				xticklabels={$2048$, $4096$, $8192$, $16384$, $32768$},
+				xticklabel style={anchor=center, yshift=-10pt}, % Rotate x-axis labels for better readability
+				log basis x=2, % Base for log scale on x-axis
+				log basis y=10, % Base for log scale on y-axis
+				]
+				
+				% Data for 2 processos
+				\addplot+ [mark=*, line width=1.2pt] coordinates {
+					(2048, 0.007393) % Source 1
+					(4096, 0.024350) % Source 3
+					(8192, 0.223196) % Source 5
+					(16384, 0.336517) % Source 6
+					(32768, 1.314407) % Source 8
+				};
+				\addlegendentry{2 Processos}
+				
+				% Data for 4 processos
+				\addplot+ [mark=square*, line width=1.2pt] coordinates {
+					(2048, 0.012269) % Source 2
+					(4096, 0.019467) % Source 3
+					(8192, 0.174600) % Source 5
+					(16384, 0.201913) % Source 6
+					(32768, 0.773659) % Source 8
+				};
+				\addlegendentry{4 Processos}
+				
+				% Data for 8 processos
+				\addplot+ [mark=triangle*, line width=1.2pt] coordinates {
+					(2048, 0.010754) % Source 1
+					(4096, 0.026092) % Source 3
+					(8192, 0.149724) % Source 5
+					(16384, 0.159433) % Source 6
+					(32768, 0.510369) % Source 8
+				};
+				\addlegendentry{8 Processos}
+				
+				% Data for 16 processos
+				\addplot+ [mark=diamond*, line width=1.2pt] coordinates {
+					(2048, 0.017535) % Source 1
+					(4096, 0.018572) % Source 3
+					(8192, 0.073371) % Source 5
+					(16384, 0.076215) % Source 6
+					(32768, 0.249389) % Source 8
+				};
+				\addlegendentry{16 Processos}
+				
+				% Data for 32 processos
+				\addplot+ [mark=pentagon*, line width=1.2pt] coordinates {
+					(2048, 0.032846) % Source 1
+					(4096, 0.033169) % Source 4
+					(8192, 0.080450) % Source 5
+					(16384, 0.075465) % Source 7
+					(32768, 0.193285) % Source 8
+				};
+				\addlegendentry{32 Processos}
+				
+			\end{axis}
+		\end{tikzpicture}
+		\caption{Gráfico de Linhas do Tempo de Execução pelo Tamanho da Matriz para Diferentes Números de Processos.}
+		\label{fig:matrix_performance}
+	\end{figure}
+	
+	
+	\begin{table}[h!]
+		\centering
+		\caption{Tempo de Execução (s) por Tamanho da Matriz e Número de Processos}
+		\label{tab:execution_times_simple}
+		\begin{tabular}{|l|c|c|c|c|c|}
+			\hline
+			\textbf{Tamanho da Matriz} & \multicolumn{5}{c|}{\textbf{Número de Processos}} \\
+			\cline{2-6}
+			& \textbf{2} & \textbf{4} & \textbf{8} & \textbf{16} & \textbf{32} \\
+			\hline
+			$2048 \times 2048$        & 0.007393   & 0.012269   & 0.010754   & 0.017535    & 0.032846    \\ % source 1, 2
+			\hline
+			$4096 \times 4096$        & 0.024350   & 0.019467   & 0.026092   & 0.018572    & 0.033169    \\ % source 3, 4
+			\hline
+			$8192 \times 8192$        & 0.223196   & 0.174600   & 0.149724   & 0.073371    & 0.080450    \\ % source 5
+			\hline
+			$16384 \times 16384$      & 0.336517   & 0.201913   & 0.159433   & 0.076215    & 0.075465    \\ % source 6, 7
+			\hline
+			$32768 \times 32768$      & 1.314407   & 0.773659   & 0.510369   & 0.249389    & 0.193285    \\ % source 8
+			\hline
+		\end{tabular}
+	\end{table}
+	
+
+\end{document}

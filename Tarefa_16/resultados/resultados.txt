@@ -1,0 +1,39 @@
+Tamanho da Matriz = 2048 x 2048
+Número de processos | tempo de execução (s)
+2  | 0.007393
+4  | 0.012269
+8  | 0.010754
+16 | 0.017535
+32 | 0.032846
+
+Tamanho da Matriz = 4096 x 4096
+Número de processos | tempo de execução (s)
+2  | 0.024350
+4  | 0.019467
+8  | 0.026092
+16 | 0.018572
+32 | 0.033169
+
+Tamanho da Matriz = 8192 x 8192
+Número de processos | tempo de execução (s)
+2  | 0.223196
+4  | 0.174600
+8  | 0.149724
+16 | 0.073371
+32 | 0.080450
+
+Tamanho da Matriz = 16384 x 16384
+Número de processos | tempo de execução (s)
+2  | 0.336517
+4  | 0.201913
+8  | 0.159433
+16 | 0.076215
+32 | 0.075465
+
+Tamanho da Matriz = 32768 x 32768
+Número de processos | tempo de execução (s)
+2  | 1.314407
+4  | 0.773659
+8  | 0.510369
+16 | 0.249389
+32 | 0.193285
