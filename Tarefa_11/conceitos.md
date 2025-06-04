@@ -4,7 +4,7 @@ Essa tarefa foi desenvolvida com o intuito de ajudar a compreender como funciona
 
 ## Colapse
 
-O colapse(n) atua como um achatador de laços de repetição aninhados. Quando temos:
+O colapse(_n_) atua como um achatador de laços de repetição aninhados. Quando temos:
 
 ```
 #pragma omp parallel for
