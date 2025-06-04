@@ -107,21 +107,6 @@ void update(double u[NX][NY][NZ], double u_new[NX][NY][NZ]) {
     }
 }
 
-// Versão alternativa usando guided schedule
-void update_guided(double u[NX][NY][NZ], double u_new[NX][NY][NZ]) {
-    #pragma omp parallel for collapse(3) schedule(guided, 2)
-    for (int i = 1; i < NX-1; i++) {
-        for (int j = 1; j < NY-1; j++) {
-            for (int k = 1; k < NZ-1; k++) {
-                double dudx2 = (u[i+1][j][k] - 2*u[i][j][k] + u[i-1][j][k]) / (DX*DX);
-                double dudy2 = (u[i][j+1][k] - 2*u[i][j][k] + u[i][j-1][k]) / (DY*DY);
-                double dudz2 = (u[i][j][k+1] - 2*u[i][j][k] + u[i][j][k-1]) / (DZ*DZ);
-                u_new[i][j][k] = u[i][j][k] + NU * DT * (dudx2 + dudy2 + dudz2);
-            }
-        }
-    }
-}
-
 // Salva o campo de velocidade em arquivo
 void save_field(double u[NX][NY][NZ], int step) {
     char filename[64];
@@ -167,7 +152,7 @@ void benchmark_schedules(double u[NX][NY][NZ], double u_new[NX][NY][NZ], int num
             // Diferentes schedules para teste
             switch(test) {
                 case 0: // static
-                    #pragma omp parallel for collapse(3) schedule(static)
+                    #pragma omp parallel for collapse(2) schedule(static)
                     for (int i = 1; i < NX-1; i++) {
                         for (int j = 1; j < NY-1; j++) {
                             for (int k = 1; k < NZ-1; k++) {
@@ -180,7 +165,7 @@ void benchmark_schedules(double u[NX][NY][NZ], double u_new[NX][NY][NZ], int num
                     }
                     break;
                 case 1: // dynamic
-                    #pragma omp parallel for collapse(3) schedule(dynamic, 4)
+                    #pragma omp parallel for collapse(2) schedule(dynamic, 4)
                     for (int i = 1; i < NX-1; i++) {
                         for (int j = 1; j < NY-1; j++) {
                             for (int k = 1; k < NZ-1; k++) {
@@ -193,7 +178,7 @@ void benchmark_schedules(double u[NX][NY][NZ], double u_new[NX][NY][NZ], int num
                     }
                     break;
                 case 2: // guided
-                    #pragma omp parallel for collapse(3) schedule(guided, 4)
+                    #pragma omp parallel for collapse(2) schedule(guided, 4)
                     for (int i = 1; i < NX-1; i++) {
                         for (int j = 1; j < NY-1; j++) {
                             for (int k = 1; k < NZ-1; k++) {
@@ -206,7 +191,7 @@ void benchmark_schedules(double u[NX][NY][NZ], double u_new[NX][NY][NZ], int num
                     }
                     break;
                 case 3: // auto
-                    #pragma omp parallel for collapse(3) schedule(auto)
+                    #pragma omp parallel for collapse(2) schedule(auto)
                     for (int i = 1; i < NX-1; i++) {
                         for (int j = 1; j < NY-1; j++) {
                             for (int k = 1; k < NZ-1; k++) {
@@ -218,8 +203,8 @@ void benchmark_schedules(double u[NX][NY][NZ], double u_new[NX][NY][NZ], int num
                         }
                     }
                     break;
-                case 4: // static
-                    #pragma omp parallel for collapse(3)
+                case 4: //
+                    #pragma omp parallel for collapse(2)
                     for (int i = 1; i < NX-1; i++) {
                         for (int j = 1; j < NY-1; j++) {
                             for (int k = 1; k < NZ-1; k++) {
@@ -266,7 +251,7 @@ int main() {
     }
     
     // Executar a simulação completa com a melhor configuração (usar guided como exemplo)
-    printf("\n=== Executando simulação completa ===\n");
+    /* printf("\n=== Executando simulação completa ===\n");
     omp_set_num_threads(4); // Usar 4 threads para a simulação
     
     gettimeofday(&inicio, NULL);
@@ -292,6 +277,6 @@ int main() {
 
     printf("Tempo total de execução: %f segundos\n", time_lapsed);
     printf("Arquivos gerados para animação.\n");
-
+ */
     return 0;
 }
